@@ -19,6 +19,7 @@ export const registerStudent = async (req, res) => {
       lastName,
       phone,
       referenceNumber,
+      isRegistered: true,
     });
 
     generateToken(res, student._id);
@@ -28,6 +29,7 @@ export const registerStudent = async (req, res) => {
       email: student.email,
       role: student.role,
       firstName: student.firstName,
+      isRegistered: student.isRegistered,
       success: true,
       message: "User created successfully",
     });
@@ -64,11 +66,21 @@ export const login = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     // Find user by ID, exclude password, and populate referenced fields
-    const user = await User.findById(req.user.id)
-      .select('-password')
-      .populate('department', 'name') // Populate department name (adjust field as needed)
-      .populate('program', 'name')   // Populate program name (adjust field as needed)
-      .populate('courses', 'title code'); // Populate course title and code
+const user = await User.findById(req.user.id)
+  .select('-password')
+  .populate({
+    path: 'courses',
+    select: 'title code unit semester program',
+    populate: {
+      path: 'program',
+      select: 'name degree department',
+      populate: {
+        path: 'department',
+        select: 'name'
+      }
+    }
+  });
+
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -91,5 +103,55 @@ export const logout = (req, res) => {
   } catch (error) {
     console.error("Logout error:", error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// GET /api/admin/stats/registered-students
+export const getTotalRegisteredStudents = async (req, res) => {
+  try {
+    const total = await User.countDocuments({ isRegistered: true });
+
+const result = await User.aggregate([
+  { $match: { isRegistered: true } },
+  { $unwind: "$courses" }, // explode array of courses
+  {
+    $lookup: {
+      from: "courses",
+      localField: "courses",
+      foreignField: "_id",
+      as: "courseInfo"
+    }
+  },
+  { $unwind: "$courseInfo" },
+  {
+    $lookup: {
+      from: "programs",
+      localField: "courseInfo.program",
+      foreignField: "_id",
+      as: "programInfo"
+    }
+  },
+  { $unwind: "$programInfo" },
+  {
+    $lookup: {
+      from: "departments",
+      localField: "programInfo.department",
+      foreignField: "_id",
+      as: "departmentInfo"
+    }
+  },
+  { $unwind: "$departmentInfo" },
+  {
+    $group: {
+      _id: "$departmentInfo._id",
+      departmentName: { $first: "$departmentInfo.name" },
+      count: { $sum: 1 }
+    }
+  }
+]);
+    res.json({ total, result });
+  } catch (err) {
+    console.error('Error fetching student count:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
