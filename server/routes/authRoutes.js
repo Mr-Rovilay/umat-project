@@ -8,12 +8,17 @@ const router = express.Router();
 router.post('/register', registerStudent);
 router.post('/login', login);
 router.get('/user', protect, getUser);
-router.get("/logout", protect, (req, res) => {
-    res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", });
-    res.status(201).json({ message: "Logged out successfully" });
+router.post('/logout', (req, res) => {
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' || true, // Force secure in dev for sameSite: "none"
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'none',
+    path: '/',
   });
+  res.status(200).json({ message: 'Logged out successfully' });
+});
 
-router.get('/admin/stats/registered-students',  protect, restrictTo('admin'), getTotalRegisteredStudents);
-router.put('/change-password', protect, restrictTo("student"), changePassword);
+router.get('/admin/stats/registered-students', protect, restrictTo('admin'), getTotalRegisteredStudents);
+router.put('/change-password', protect, restrictTo('student'), changePassword);
 
 export default router;

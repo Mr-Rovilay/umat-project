@@ -119,17 +119,6 @@ const Signup = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            {/* {error && (
-              <Alert
-                variant="destructive"
-                className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800"
-              >
-                <AlertDescription className="text-red-800 dark:text-red-200">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )} */}
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

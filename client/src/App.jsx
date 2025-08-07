@@ -1,26 +1,45 @@
-import AdminDashboard from "./components/pages/Dashboard/AdminDashboard";
-import Login from "./components/pages/auth/Login";
-import Signup from "./components/pages/auth/Signup";
-import Navbar from "./components/Navbar";
-import { Route, Routes } from "react-router-dom";
-import Home from "./components/pages/Home/Home";
-import { useEffect } from "react";
-import { getUser } from "./redux/slice/authSlice";
-import { useSelector } from "react-redux";
-import Store from "./redux/store";
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import ProtectedRoute from './routes/ProtectedRoute';
+import { getUser } from './redux/slice/authSlice';
+import Navbar from './components/Navbar';
+import Home from './components/pages/Home/Home';
+import Login from './components/pages/auth/Login';
+import Signup from './components/pages/auth/Signup';
+import StudentDashboard from './components/pages/Dashboard/StudentDashboard';
+import AdminDepartmentManagement from './components/pages/AdminDepartmentManagement';
+import AdminDashboard from './components/pages/Dashboard/AdminDashboard';
+import DepartmentsPage from './components/pages/DepartmentsPage';
+import NewsPage from './components/pages/NewsPage';
+import ProgramsPage from './components/pages/ProgramsPage';
+import AboutPage from './components/pages/AboutPage';
+import Store from './redux/store';
 
-const App = () => {
-  const { isAuthenticated, user,  isLoading } = useSelector((state) => state.auth);
-  console.log(isAuthenticated, user)
-    // Check authentication on mount
-  useEffect(() => {
+
+
+
+function App() {
+  const [loading, setLoading] = useState(true);
+
+  const dispatch = useDispatch();
+  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+
+    // useEffect(() => {
+    //   if (isAuthenticated) {
+    //     dispatch(getUser());
+    //   }
+    // }, [dispatch, isAuthenticated, isLoading]);
+  
+
+    useEffect(() => {
     const fetchUser = async () => {
       try {
         await Store.dispatch(getUser());
       } catch (error) {
         console.error("Failed to load user", error);
       } finally {
-        // isLoading(false);
+        setLoading(false);
       }
     };
 
@@ -30,22 +49,62 @@ const App = () => {
 
 
   return (
-    <div className="">
-      <>
-        <Navbar />
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow pt-16">
         <Routes>
-          <Route
-            path="/"
-            element={<Home />}
-          />
-          {/* <Route path="/news" element={<NewsPage />} /> */}
-          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/programs" element={<ProgramsPage />} />
+          <Route path="/news" element={<NewsPage />} />
+          <Route path="/departments" element={<DepartmentsPage />} /> 
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/departments"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminDepartmentManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-dashboard"
+            element={
+              <ProtectedRoute role="student">
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </>
+      </main>
     </div>
   );
-};
+}
 
 export default App;

@@ -40,7 +40,6 @@ const Login = () => {
   const { isLoading, isAuthenticated } = useSelector(
     (state) => state.auth
   );
-  console.log(isAuthenticated)
   const [showPassword, setShowPassword] = useState(false);
 
   const {

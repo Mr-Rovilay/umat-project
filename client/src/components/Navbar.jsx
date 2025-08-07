@@ -9,8 +9,8 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Menu, Moon, Sun, LogOut, LogIn, User, ChevronDown, Settings } from 'lucide-react';
-import { logout } from '@/redux/slice/authSlice';
 import { toast } from 'sonner';
+import { logoutUser } from '@/redux/slice/authSlice';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,12 +21,12 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  console.log(user, isAuthenticated);
+  const { user, isAuthenticated, isLoading, error } = useSelector((state) => state.auth);
 
+  // useEffect(() => {
+  //   console.log('Auth state:', { user, isAuthenticated, isLoading });
+  // }, [user, isAuthenticated, isLoading]);
 
-
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -35,7 +35,6 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Initialize dark mode based on system preference
   useEffect(() => {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedMode = localStorage.getItem('darkMode');
@@ -45,6 +44,12 @@ const Navbar = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (error && error.includes('Logout')) {
+      toast.error(error);
+    }
+  }, [error]);
+
   const toggleDarkMode = () => {
     document.documentElement.classList.toggle('dark');
     const newDarkMode = !isDark;
@@ -52,23 +57,16 @@ const Navbar = () => {
     localStorage.setItem('darkMode', newDarkMode);
   };
 
-  // const handleLogout = () => {
-  //   dispatch(logout());
-  //   setIsOpen(false);
-  //   navigate('/');
-  // };
-
   const handleLogout = async () => {
     try {
-      await dispatch(logout());
-      toast.success("Logged out successfully");
-      navigate("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Failed to logout. Please try again.");
+      await dispatch(logoutUser()).unwrap();
+      toast.success('Logged out successfully');
+      setIsOpen(false);
+      navigate('/');
+    } catch (err) {
+      toast.error('Failed to log out');
     }
   };
-
 
   const handleMobileLinkClick = () => {
     setIsOpen(false);
@@ -84,7 +82,6 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Section */}
           <NavLink
             to="/"
             className="flex items-center space-x-3 hover:opacity-90 transition-opacity duration-200 group"
@@ -107,9 +104,7 @@ const Navbar = () => {
             </div>
           </NavLink>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {/* Navigation Links */}
             <div className="flex items-center space-x-1 mr-6">
               <NavLink
                 to="/"
@@ -159,6 +154,18 @@ const Navbar = () => {
               >
                 News
               </NavLink>
+              <NavLink
+                to="/departments"
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                      : 'text-green-100 hover:bg-white/10 hover:text-white'
+                  }`
+                }
+              >
+                Departments
+              </NavLink>
               {user?.role === 'admin' && (
                 <NavLink
                   to="/dashboard"
@@ -171,6 +178,20 @@ const Navbar = () => {
                   }
                 >
                   Dashboard
+                </NavLink>
+              )}
+              {user?.role === 'admin' && (
+                <NavLink
+                  to="/dashboard/departments"
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                        : 'text-green-100 hover:bg-white/10 hover:text-white'
+                    }`
+                  }
+                >
+                  Manage Departments
                 </NavLink>
               )}
               {isAuthenticated && user?.role === 'student' && (
@@ -189,9 +210,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              {/* Theme Toggle */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -202,13 +221,13 @@ const Navbar = () => {
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
 
-              {/* Auth Section */}
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       className="flex items-center space-x-2 text-green-100 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg transition-all duration-200"
+                      disabled={isLoading}
                     >
                       <User className="h-4 w-4" />
                       <span className="text-sm font-medium">
@@ -230,9 +249,13 @@ const Navbar = () => {
                         Settings
                       </NavLink>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-600"
+                      disabled={isLoading}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Logout
+                      {isLoading ? 'Logging out...' : 'Logout'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -250,7 +273,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
@@ -273,7 +295,7 @@ const Navbar = () => {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold">UMAT</span>
-                      <span className="dark:text-white text-xs text-gray-500">Knowledge | Truth | Excellence</span>
+                      <span className="text-xs text-gray-500">Knowledge | Truth | Excellence</span>
                     </div>
                   </div>
                 </div>
@@ -313,16 +335,36 @@ const Navbar = () => {
                     News
                   </NavLink>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <NavLink
+                    to="/departments"
+                    onClick={handleMobileLinkClick}
+                    className="flex items-center w-full px-2 py-2"
+                  >
+                    Departments
+                  </NavLink>
+                </DropdownMenuItem>
                 {user?.role === 'admin' && (
-                  <DropdownMenuItem asChild>
-                    <NavLink
-                      to="/dashboard"
-                      onClick={handleMobileLinkClick}
-                      className="flex items-center w-full px-2 py-2"
-                    >
-                      Dashboard
-                    </NavLink>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <NavLink
+                        to="/dashboard"
+                        onClick={handleMobileLinkClick}
+                        className="flex items-center w-full px-2 py-2"
+                      >
+                        Dashboard
+                      </NavLink>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <NavLink
+                        to="/dashboard/departments"
+                        onClick={handleMobileLinkClick}
+                        className="flex items-center w-full px-2 py-2"
+                      >
+                        Manage Departments
+                      </NavLink>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 {isAuthenticated && user?.role === 'student' && (
                   <DropdownMenuItem asChild>
@@ -377,9 +419,10 @@ const Navbar = () => {
                       <DropdownMenuItem
                         onClick={handleLogout}
                         className="text-red-600 flex items-center space-x-2"
+                        disabled={isLoading}
                       >
                         <LogOut className="h-4 w-4" />
-                        <span>Logout</span>
+                        <span>{isLoading ? 'Logging out...' : 'Logout'}</span>
                       </DropdownMenuItem>
                     </>
                   ) : (

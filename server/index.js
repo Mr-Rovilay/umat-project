@@ -47,8 +47,8 @@ app.use((err, req, res, next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
-app.use("/api/program", programRoutes);
-app.use("/api/department", departmentRoutes);
+app.use("/api/programs", programRoutes);
+app.use("/api/departments", departmentRoutes);
 app.use("/api/news", newsPostRoutes);
 app.use("/api/dashboard", adminDashboardRoutes);
 app.use("/api/payments", paymentRoutes);
