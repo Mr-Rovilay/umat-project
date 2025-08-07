@@ -12,8 +12,8 @@ const userSchema = new mongoose.Schema(
     lastName: String,
     phone: String,
     referenceNumber: String,
-    // department: [{ type: mongoose.Schema.Types.ObjectId, ref: "Department" }],
-    //return back ifgetTotalRegisteredStudents stop working.
+    department: [{ type: mongoose.Schema.Types.ObjectId, ref: "Department" }],
+    //return back if getTotalRegisteredStudents stop working.
     // program: [{ type: mongoose.Schema.Types.ObjectId, ref: "Program" }],
     level: String,
     password: String,

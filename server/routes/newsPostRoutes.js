@@ -5,6 +5,8 @@ import {
   likeNewsPost,
   commentNewsPost,
   reactNewsPost,
+  editNewsPost,
+  deleteNewsPost,
 } from '../controllers/newsPostController.js';
 import multer from 'multer';
 import { protect } from '../middleware/authMiddleware.js';
@@ -21,6 +23,8 @@ const router = express.Router();
 
 // Admin routes
 router.post('/', protect, restrictTo("admin"), upload.array('images', 5), createNewsPost); // Create news post with up to 5 images
+router.put('/:id',  protect, restrictTo("admin"), upload.array('images', 5), editNewsPost); // Edit news post
+router.delete('/:id',  protect, restrictTo("admin"),deleteNewsPost); // Delete news post
 
 // Student routes
 router.get('/', protect, getNewsPosts); // Get news posts by department

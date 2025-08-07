@@ -194,3 +194,120 @@ export const reactNewsPost = async (req, res) => {
     res.status(500).json({ message: 'Server error while reacting to news post' });
   }
 };
+
+// Admin: Edit a news post
+export const editNewsPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, department, allowLikes, allowComments, allowReactions, removeImages } = req.body;
+    const files = req.files;
+
+    // Validate post ID
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    // Validate department if provided
+    if (department && !mongoose.isValidObjectId(department)) {
+      return res.status(400).json({ message: 'Invalid department ID' });
+    }
+
+    const post = await NewsPost.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: 'News post not found' });
+    }
+
+    // Check if user is the poster or an admin
+    if (post.postedBy.toString() !== req.user._id.toString() || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized to edit this post' });
+    }
+
+    // Handle image updates
+    let images = post.images;
+    if (removeImages && Array.isArray(removeImages)) {
+      // Delete specified images from Cloudinary
+      await Promise.all(
+        removeImages.map(publicId =>
+          cloudinary.v2.uploader.destroy(publicId)
+        )
+      );
+      images = images.filter(img => !removeImages.includes(img.publicId));
+    }
+
+    if (files && files.length > 0) {
+      const uploadPromises = files.map(file =>
+        cloudinary.v2.uploader.upload(file.path, { folder: 'news_posts' })
+      );
+      const results = await Promise.all(uploadPromises);
+      images = [
+        ...images,
+        ...results.map(result => ({
+          url: result.secure_url,
+          publicId: result.public_id,
+        })),
+      ];
+
+      // Clean up local files
+      await Promise.all(files.map(file => unlink(file.path)));
+    }
+
+    // Update post fields
+    post.title = title || post.title;
+    post.content = content || post.content;
+    post.department = department || post.department;
+    post.allowLikes = allowLikes !== undefined ? allowLikes : post.allowLikes;
+    post.allowComments = allowComments !== undefined ? allowComments : post.allowComments;
+    post.allowReactions = allowReactions !== undefined ? allowReactions : post.allowReactions;
+    post.images = images;
+
+    await post.save();
+
+    const populatedPost = await NewsPost.findById(id)
+      .populate('department', 'name')
+      .populate('postedBy', 'firstName lastName')
+      .populate('comments.user', 'firstName lastName')
+      .populate('reactions.user', 'firstName lastName');
+
+    res.status(200).json({ message: 'News post updated successfully', post: populatedPost });
+  } catch (error) {
+    console.error('Edit News Post Error:', error);
+    res.status(500).json({ message: 'Server error while updating news post' });
+  }
+};
+
+// Admin: Delete a news post
+export const deleteNewsPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate post ID
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    const post = await NewsPost.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: 'News post not found' });
+    }
+
+    // Check if user is the poster or an admin
+    if (post.postedBy.toString() !== req.user._id.toString() || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized to delete this post' });
+    }
+
+    // Delete images from Cloudinary
+    if (post.images.length > 0) {
+      await Promise.all(
+        post.images.map(img => cloudinary.v2.uploader.destroy(img.publicId))
+      );
+    }
+
+    // Delete post
+    await NewsPost.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'News post deleted successfully' });
+  } catch (error) {
+    console.error('Delete News Post Error:', error);
+    res.status(500).json({ message: 'Server error while deleting news post' });
+  }
+};

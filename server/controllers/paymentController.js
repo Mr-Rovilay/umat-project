@@ -17,9 +17,9 @@ export const initializePayment = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    if (!user.department.includes(department)) {
-      return res.status(400).json({ message: 'User is not part of the specified department' });
-    }
+    // if (!user.department.includes(department)) {
+    //   return res.status(400).json({ message: 'User is not part of the specified department' });
+    // }
 
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
