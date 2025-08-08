@@ -1,30 +1,35 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { logoutUser } from './authSlice';
 import api from '@/utils/server';
 
-// Async thunk to get dashboard analytics
-export const getDashboardAnalytics = createAsyncThunk(
-  'dashboard/getAnalytics',
+const initialState = {
+  stats: {
+    courses: 0,
+    students: 0,
+    departments: 0,
+    programs: 0,
+    newsPosts: 0,
+    pendingTasks: 0,
+  },
+  isLoading: false,
+  error: null,
+};
+
+export const fetchDashboardStats = createAsyncThunk(
+  'dashboard/fetchDashboardStats',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/api/dashboard/analytics');
-      return response.data;
+      const response = await api.get('/api/dashboard/stats');
+      return response.data.stats;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch analytics');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch dashboard stats');
     }
   }
 );
 
 const dashboardSlice = createSlice({
   name: 'dashboard',
-  initialState: {
-    analytics: {
-      onlineUsers: 0,
-      onlineUsersByDepartment: [],
-      paymentStats: [],
-    },
-    isLoading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
     clearError: (state) => {
       state.error = null;
@@ -32,17 +37,20 @@ const dashboardSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getDashboardAnalytics.pending, (state) => {
+      .addCase(fetchDashboardStats.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getDashboardAnalytics.fulfilled, (state, action) => {
+      .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.analytics = action.payload;
+        state.stats = action.payload;
       })
-      .addCase(getDashboardAnalytics.rejected, (state, action) => {
+      .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(logoutUser.fulfilled, () => {
+        return initialState;
       });
   },
 });

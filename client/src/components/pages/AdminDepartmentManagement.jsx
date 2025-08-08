@@ -15,7 +15,7 @@ import { clearError, clearSuccessMessage, createDepartment, deleteDepartment, ge
 
 const AdminDepartmentManagement = () => {
   const dispatch = useDispatch();
-  const { departments, isLoading, error, successMessage } = useSelector((state) => state.department);
+  const { departments, isLoading, error, successMessage } = useSelector((state) => state.departments);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   const [name, setName] = useState('');
@@ -73,8 +73,8 @@ const AdminDepartmentManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-5">
+      <div className="">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Manage Departments

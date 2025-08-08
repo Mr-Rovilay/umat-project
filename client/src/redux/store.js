@@ -1,20 +1,24 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slice/authSlice';
-import departmentReducer from './slice/departmentSlice';
-import dashboardReducer from './slice/departmentSlice';
-import programReducer from './slice/programSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./slice/authSlice";
+import departmentReducer from "./slice/departmentSlice";
+import programReducer from "./slice/programSlice";
+import courseReducer from "./slice/courseSlice";
+import newsReducer from './slice/newsSlice';
+import dashboardReducer from './slice/dashboardSlice';
 
 export const Store = configureStore({
   reducer: {
     auth: authReducer,
-  department: departmentReducer,
-  dashboard: dashboardReducer,
-  program: programReducer,
+    departments: departmentReducer,
+    programs: programReducer,
+    courses: courseReducer,
+    news: newsReducer,
+    dashboard: dashboardReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        ignoredActions: ["persist/PERSIST"],
       },
     }),
 });

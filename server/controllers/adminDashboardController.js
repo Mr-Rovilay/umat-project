@@ -1,7 +1,9 @@
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
+import Course from '../models/Course.js';
 import Department from '../models/Department.js';
-import mongoose from 'mongoose';
+import Program from '../models/Program.js';
+import NewsPost from '../models/NewsPost.js';
 
 // Get dashboard analytics
 export const getDashboardAnalytics = async (req, res) => {
@@ -55,5 +57,41 @@ export const getDashboardAnalytics = async (req, res) => {
   } catch (error) {
     console.error('Get Dashboard Analytics Error:', error);
     res.status(500).json({ message: 'Server error while fetching dashboard analytics' });
+  }
+};
+
+
+
+export const getDashboardStats = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const [courseCount, studentCount, departmentCount, programCount, newsPostCount] = await Promise.all([
+      Course.countDocuments(),
+      User.countDocuments({ role: 'student' }),
+      Department.countDocuments(),
+      Program.countDocuments(),
+      NewsPost.countDocuments(),
+    ]);
+
+    // Example for pending tasks (adjust based on your logic)
+    const pendingTasks = 0; // Placeholder: e.g., unapproved courses or users
+    // Example: const pendingTasks = await Course.countDocuments({ approved: false });
+
+    res.status(200).json({
+      stats: {
+        courses: courseCount,
+        students: studentCount,
+        departments: departmentCount,
+        programs: programCount,
+        newsPosts: newsPostCount,
+        pendingTasks,
+      },
+    });
+  } catch (error) {
+    console.error('Get Dashboard Stats Error:', error);
+    res.status(500).json({ message: 'Server error while fetching dashboard stats' });
   }
 };

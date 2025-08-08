@@ -67,7 +67,7 @@ export const deleteDepartment = createAsyncThunk(
 );
 
 const departmentSlice = createSlice({
-  name: 'department',
+  name: 'departments',
   initialState: {
     departments: [],
     currentDepartment: null,

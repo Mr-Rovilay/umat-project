@@ -1,21 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import ProtectedRoute from './routes/ProtectedRoute';
-import { getUser } from './redux/slice/authSlice';
-import Navbar from './components/Navbar';
-import Home from './components/pages/Home/Home';
-import Login from './components/pages/auth/Login';
-import Signup from './components/pages/auth/Signup';
-import StudentDashboard from './components/pages/Dashboard/StudentDashboard';
-import AdminDepartmentManagement from './components/pages/AdminDepartmentManagement';
-import AdminDashboard from './components/pages/Dashboard/AdminDashboard';
-import DepartmentsPage from './components/pages/DepartmentsPage';
-import NewsPage from './components/pages/NewsPage';
-import ProgramsPage from './components/pages/ProgramsPage';
-import AboutPage from './components/pages/AboutPage';
-import Store from './redux/store';
-import AdminProgramManagement from './components/pages/AdminProgramManagement';
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import { getUser } from "./redux/slice/authSlice";
+import Navbar from "./components/Navbar";
+import Home from "./components/pages/Home/Home";
+import Login from "./components/pages/auth/Login";
+import Signup from "./components/pages/auth/Signup";
+import StudentDashboard from "./components/pages/Dashboard/StudentDashboard";
+import AdminDepartmentManagement from "./components/pages/AdminDepartmentManagement";
+import AdminDashboard from "./components/pages/Dashboard/AdminDashboard";
+import DepartmentsPage from "./components/pages/DepartmentsPage";
+import ProgramsPage from "./components/pages/ProgramsPage";
+import AboutPage from "./components/pages/AboutPage";
+import Store from "./redux/store";
+import AdminProgramManagement from "./components/pages/AdminProgramManagement";
+import AvailableCourses from "./components/AvailableCourses";
+import RegisterCourses from "./components/RegisterCourses";
+import MyCourses from "./components/pages/MyCourses";
+import CreateCourse from "./components/pages/CreateCourse";
+import ManageCourses from "./components/pages/ManageCourses";
+import News from "./components/pages/News";
+import CreateNewsPost from "./components/pages/CreateNewsPost";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -23,14 +29,13 @@ function App() {
   // const dispatch = useDispatch();
   // const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
 
-    // useEffect(() => {
-    //   if (isAuthenticated) {
-    //     dispatch(getUser());
-    //   }
-    // }, [dispatch, isAuthenticated, isLoading]);
-  
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     dispatch(getUser());
+  //   }
+  // }, [dispatch, isAuthenticated, isLoading]);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         await Store.dispatch(getUser());
@@ -54,8 +59,10 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/programs" element={<ProgramsPage />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/departments" element={<DepartmentsPage />} /> 
+          <Route path="/departments" element={<DepartmentsPage />} />
+                        <Route path="/news" element={<News />} />
+              <Route path="/news/create" element={<ProtectedRoute role="admin"><CreateNewsPost /></ProtectedRoute>} />
+              <Route path="/news/edit/:id" element={<ProtectedRoute role="admin"><CreateNewsPost /></ProtectedRoute>} />
           <Route
             path="/dashboard"
             element={
@@ -72,7 +79,47 @@ function App() {
               </ProtectedRoute>
             }
           />
-                    <Route
+                        <Route
+                path="/courses/available"
+                element={
+                  <ProtectedRoute role="student">
+                    <AvailableCourses />
+                  </ProtectedRoute>
+                }
+              />
+                            <Route
+                path="/courses/register"
+                element={
+                  <ProtectedRoute role="student">
+                    <RegisterCourses />
+                  </ProtectedRoute>
+                }
+              />
+                            <Route
+                path="/courses/my-courses"
+                element={
+                  <ProtectedRoute role="student">
+                    <MyCourses />
+                  </ProtectedRoute>
+                }
+              />
+                            <Route
+                path="/courses/create"
+                element={
+                  <ProtectedRoute role="admin">
+                    <CreateCourse />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/manage"
+                element={
+                  <ProtectedRoute role="admin">
+                    <ManageCourses />
+                  </ProtectedRoute>
+                }
+              />
+          <Route
             path="/dashboard/programs"
             element={
               <ProtectedRoute role="admin">
@@ -88,22 +135,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          /> */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
