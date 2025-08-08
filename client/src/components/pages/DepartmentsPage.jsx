@@ -7,7 +7,7 @@ import { getAllDepartments } from '@/redux/slice/departmentSlice';
 
 const DepartmentsPage = () => {
   const dispatch = useDispatch();
-  const { departments, isLoading, error } = useSelector((state) => state.department);
+  const { departments, isLoading, error } = useSelector((state) => state.departments);
 
   useEffect(() => {
     dispatch(getAllDepartments());

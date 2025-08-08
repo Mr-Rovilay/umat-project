@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { Menu, Moon, Sun, LogOut, LogIn, User, ChevronDown, Settings } from 'lucide-react';
+import { Menu, Moon, Sun, LogOut, LogIn, User, ChevronDown, Settings, Newspaper } from 'lucide-react';
 import { toast } from 'sonner';
 import { logoutUser } from '@/redux/slice/authSlice';
 
@@ -102,20 +102,23 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center space-x-1">
             <div className="flex items-center space-x-1 mr-6">
-               {/* {user?.role === 'student' && ( */}
-              <NavLink
-                to="/news"
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                      : 'text-green-100 hover:bg-white/10 hover:text-white'
-                  }`
-                }
-              >
-                News
-              </NavLink>
-               {/* )} */}
+          {(user?.role === 'student' || user?.role === 'admin') && (
+            <NavLink
+              to="/news"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                    : 'text-green-100 hover:bg-white/10 hover:text-white'
+                }`
+              }
+            >
+              <div className="flex items-center space-x-1">
+                <Newspaper className="w-4 h-4" />
+                <span>News</span>
+              </div>
+            </NavLink>
+          )}
              {user?.role === 'student' && (
               <NavLink
                 to="/departments"
@@ -146,7 +149,7 @@ const Navbar = () => {
               )}
               {isAuthenticated && user?.role === 'student' && (
                 <NavLink
-                  to="/student-dashboard"
+                  to="/student/dashboard"
                   className={({ isActive }) =>
                     `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive

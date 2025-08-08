@@ -33,12 +33,12 @@ const HeroSection = () => {
     }
   ]
   
-  const achievements = [
-    { icon: Award, number: "#1", label: "Mining University in West Africa" },
-    { icon: Users, number: "8,500+", label: "Active Students" },
-    { icon: BookOpen, number: "45+", label: "Degree Programs" },
-    { icon: Microscope, number: "12", label: "Research Centers" }
-  ]
+  // const achievements = [
+  //   { icon: Award, number: "#1", label: "Mining University in West Africa" },
+  //   { icon: Users, number: "8,500+", label: "Active Students" },
+  //   { icon: BookOpen, number: "45+", label: "Degree Programs" },
+  //   { icon: Microscope, number: "12", label: "Research Centers" }
+  // ]
   
   useEffect(() => {
     setIsVisible(true)
@@ -121,7 +121,7 @@ const HeroSection = () => {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold transition-all duration-300"
+                  className="border-white/30 hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold transition-all duration-300"
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Virtual Tour
@@ -175,28 +175,6 @@ const HeroSection = () => {
                 <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full opacity-20 animate-pulse"></div>
                 <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-gradient-to-r from-blue-400 to-emerald-400 rounded-full opacity-30 animate-pulse delay-1000"></div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Achievement Stats Bar */}
-      <div className="absolute bottom-20 left-0 right-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-6">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {achievements.map((achievement, index) => {
-                const Icon = achievement.icon
-                return (
-                  <div key={index} className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-500/20 rounded-xl mb-3 group-hover:bg-emerald-500/30 transition-colors">
-                      <Icon className="h-6 w-6 text-emerald-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-white">{achievement.number}</div>
-                    <div className="text-sm text-gray-300">{achievement.label}</div>
-                  </div>
-                )
-              })}
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
 import AboutSection from '@/components/AboutSection'
-import CallToActionSection from '@/components/CallToActionSection'
 import CampusLifeSection from '@/components/CampusLifeSection'
 import Footer from '@/components/Footer'
 import HeroSection from '@/components/HeroSection'

@@ -128,7 +128,7 @@ function App() {
             }
           />
           <Route
-            path="/student-dashboard"
+            path="/student/dashboard"
             element={
               <ProtectedRoute role="student">
                 <StudentDashboard />

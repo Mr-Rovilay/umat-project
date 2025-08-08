@@ -56,7 +56,7 @@ const Login = () => {
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated) {
-       navigate("/student/dashboard")
+       navigate("/")
     }
   }, [isAuthenticated, navigate]);
 
@@ -70,7 +70,8 @@ const Login = () => {
     try {
       await dispatch(loginUser(data)).unwrap();
       toast.success("Login successful! Redirecting to dashboard...");
-       navigate("/student/dashboard")
+      window.location.reload()
+       navigate("/")
       // Navigation will be handled by the useEffect above
     } catch (error) {
       toast.error(`Login Failed: ${error}`);

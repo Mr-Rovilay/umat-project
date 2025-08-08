@@ -1,27 +1,272 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Calendar, 
+  TrendingUp, 
+  Award,
+  Users,
+  Clock,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 
 function StudentDashboard() {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">
-        Welcome, {user?.firstName} {user?.lastName}
-      </h1>
-      <div className="space-x-4">
-        <Link
-          to="/courses/available"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-        >
-          Available Courses
-        </Link>
-        <Link
-          to="/courses/my-courses"
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
-        >
-          My Courses
-        </Link>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg mb-6">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+            Student Dashboard
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Welcome back, {user?.firstName} {user?.lastName}! Here's an overview of your academic progress.
+          </p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Enrolled Courses</CardTitle>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">6</div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Active courses</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Completed</CardTitle>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">12</div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Courses finished</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">GPA</CardTitle>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">3.75</div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Current average</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Credits</CardTitle>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <Award className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">78</div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Out of 120</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <Link to="/courses/available">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Available Courses</CardTitle>
+                    <CardDescription>
+                      Browse and register for new courses
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
+                  <span>Explore courses</span>
+                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/courses/my-courses">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">My Courses</CardTitle>
+                    <CardDescription>
+                      View your enrolled courses and progress
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
+                  <span>View my courses</span>
+                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+
+          <Link to="/courses/register">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Register Courses</CardTitle>
+                    <CardDescription>
+                    Enrolled courses and progress
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
+                  <span>View my courses</span>
+                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Upcoming Deadlines */}
+        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-10">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              Upcoming Deadlines
+            </CardTitle>
+            <CardDescription>
+              Stay on top of your upcoming assignments and exams
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Data Structures Assignment</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Computer Science Department</p>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-red-500 mr-1" />
+                  <span className="text-sm font-medium text-red-600 dark:text-red-400">Tomorrow, 11:59 PM</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Calculus II Midterm</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Mathematics Department</p>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-amber-500 mr-1" />
+                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Jun 15, 2023</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Physics Lab Report</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Physics Department</p>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-blue-500 mr-1" />
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Jun 20, 2023</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Announcements */}
+        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <AlertCircle className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              Recent Announcements
+            </CardTitle>
+            <CardDescription>
+              Important updates and notices from your departments
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Course registration extended</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Registration deadline extended to June 15</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Library hours updated</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Extended weekend hours now available</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">New computer lab opened</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">24/7 access in Engineering Building</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
