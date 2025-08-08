@@ -268,7 +268,7 @@ const Navbar = () => {
                 {isAuthenticated && user?.role === 'student' && (
                   <DropdownMenuItem asChild>
                     <NavLink
-                      to="/student-dashboard"
+                      to="/student/dashboard"
                       onClick={handleMobileLinkClick}
                       className="flex items-center w-full px-2 py-2"
                     >
@@ -295,7 +295,7 @@ const Navbar = () => {
                 <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
                   {isAuthenticated ? (
                     <>
-                      <DropdownMenuItem asChild>
+                      {/* <DropdownMenuItem asChild>
                         <NavLink
                           to="/profile"
                           onClick={handleMobileLinkClick}
@@ -314,7 +314,7 @@ const Navbar = () => {
                           <Settings className="mr-2 h-4 w-4" />
                           <span>Settings</span>
                         </NavLink>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={handleLogout}
                         className="text-red-600 flex items-center space-x-2"
