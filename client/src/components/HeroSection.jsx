@@ -109,7 +109,7 @@ const HeroSection = () => {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              {/* <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
@@ -126,7 +126,7 @@ const HeroSection = () => {
                   <Play className="mr-2 h-5 w-5" />
                   Virtual Tour
                 </Button>
-              </div>
+              </div> */}
               
               {/* Slide Indicators */}
               <div className="flex space-x-3">
