@@ -37,7 +37,7 @@ const loginSchema = z.object({
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, isAuthenticated } = useSelector(
+  const { isLoading, isAuthenticated, user } = useSelector(
     (state) => state.auth
   );
   const [showPassword, setShowPassword] = useState(false);
@@ -54,11 +54,17 @@ const Login = () => {
   });
 
   useEffect(() => {
-    // Redirect if already authenticated
-    if (isAuthenticated) {
-       navigate("/")
+    // Redirect based on user role if authenticated
+    if (isAuthenticated && user) {
+      if (user.role === "student") {
+        navigate("/student/dashboard");
+      } else if (user.role === "admin") {
+        navigate("/dashboard");
+      } else {
+        navigate("/"); // Fallback for other roles or undefined
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     return () => {
@@ -70,9 +76,8 @@ const Login = () => {
     try {
       await dispatch(loginUser(data)).unwrap();
       toast.success("Login successful! Redirecting to dashboard...");
-      window.location.reload()
-       navigate("/")
-      // Navigation will be handled by the useEffect above
+      window.location.reload(); // Reload to update user state
+      // No need for window.location.reload() or navigate here, handled by useEffect
     } catch (error) {
       toast.error(`Login Failed: ${error}`);
     }
@@ -101,7 +106,6 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label

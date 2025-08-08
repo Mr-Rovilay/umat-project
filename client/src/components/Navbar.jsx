@@ -204,7 +204,7 @@ const Navbar = () => {
                     </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-600"
+                      className="text-red-600 cursor-pointer"
                       disabled={isLoading}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -216,7 +216,7 @@ const Navbar = () => {
                 <NavLink to="/login">
                   <Button
                     size="sm"
-                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                   >
                     <LogIn className="mr-2 h-4 w-4" />
                     Login
@@ -317,7 +317,7 @@ const Navbar = () => {
                       </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={handleLogout}
-                        className="text-red-600 flex items-center space-x-2"
+                        className="text-red-600 flex items-center space-x-2 cursor-pointer"
                         disabled={isLoading}
                       >
                         <LogOut className="h-4 w-4" />
@@ -329,7 +329,7 @@ const Navbar = () => {
                       <NavLink
                         to="/login"
                         onClick={handleMobileLinkClick}
-                        className="flex items-center space-x-2 w-full px-2 py-2"
+                        className="flex items-center space-x-2 w-full px-2 py-2 cursor-pointer"
                       >
                         <LogIn className="h-4 w-4" />
                         <span>Login</span>

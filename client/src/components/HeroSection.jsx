@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Button } from "./ui/button"
-import { ChevronRight, Play, Award, Users, BookOpen, Microscope, ArrowDown } from 'lucide-react'
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { Button } from "./ui/button";
+import { ChevronRight, Play, Award, Users, BookOpen, Microscope, ArrowDown } from 'lucide-react';
 
 const HeroSection = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   
   const slides = [
     {
@@ -31,26 +34,19 @@ const HeroSection = () => {
       cta: "Join Community",
       stats: { number: "15,000+", label: "Alumni Worldwide" }
     }
-  ]
-  
-  // const achievements = [
-  //   { icon: Award, number: "#1", label: "Mining University in West Africa" },
-  //   { icon: Users, number: "8,500+", label: "Active Students" },
-  //   { icon: BookOpen, number: "45+", label: "Degree Programs" },
-  //   { icon: Microscope, number: "12", label: "Research Centers" }
-  // ]
+  ];
   
   useEffect(() => {
-    setIsVisible(true)
+    setIsVisible(true);
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [])
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
   
   const scrollToContent = () => {
-    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
-  }
+    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+  };
   
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-emerald-900 overflow-hidden">
@@ -109,24 +105,32 @@ const HeroSection = () => {
               </div>
               
               {/* Action Buttons */}
-              {/* <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
-                >
-                  {slides[currentSlide].cta}
-                  <ChevronRight className="ml-2 h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-white/30 hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold transition-all duration-300"
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  Virtual Tour
-                </Button>
-              </div> */}
+              {!isAuthenticated && (
+                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                  <Button 
+                    asChild
+                    size="lg" 
+                    className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <Link to="/login">
+                      Login
+                      <ChevronRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  
+                  <Button 
+                    asChild
+                    variant="outline" 
+                    size="lg"
+                    className="backdrop-blur-sm px-8 py-4 text-lg font-semibold"
+                  >
+                    <Link to="/signup">
+                      Sign Up
+                      <Play className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
               
               {/* Slide Indicators */}
               <div className="flex space-x-3">
@@ -189,7 +193,7 @@ const HeroSection = () => {
         <ArrowDown className="h-6 w-6" />
       </button>
     </section>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

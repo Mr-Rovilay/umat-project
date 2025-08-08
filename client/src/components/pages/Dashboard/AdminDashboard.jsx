@@ -27,11 +27,6 @@ function AdminDashboard() {
     error: null
   };
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Dashboard State:', dashboardState);
-  }, [dashboardState]);
-
   useEffect(() => {
     dispatch(fetchDashboardStats());
   }, [dispatch]);

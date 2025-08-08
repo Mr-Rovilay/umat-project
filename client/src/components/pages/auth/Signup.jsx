@@ -74,9 +74,10 @@ const Signup = () => {
   useEffect(() => {
     if (registrationSuccess) {
       toast.success("Registration Successful! Your account has been created.");
+      navigate("/student/dashboard")
+      window.location.reload();
       reset();
       dispatch(clearRegistrationSuccess());
-      navigate("/student/dashboard")
 
     }
   }, [registrationSuccess, reset, dispatch]);

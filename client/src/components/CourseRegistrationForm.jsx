@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   BookOpen, 
   Hash, 
@@ -24,7 +25,6 @@ function CourseRegistrationForm() {
   const dispatch = useDispatch();
   const { availableCourses, isLoading: courseLoading, error: courseError } = useSelector((state) => state.courses);
   const { programs, isLoading: programLoading, error: programError } = useSelector((state) => state.programs);
-  console.log(programs)
   const { user } = useSelector((state) => state.auth);
   
   const { control, handleSubmit, watch, reset, formState: { errors } } = useForm({
@@ -40,6 +40,19 @@ function CourseRegistrationForm() {
   const level = watch('level');
   const semester = watch('semester');
 
+  // Fetch programs on mount
+  useEffect(() => {
+    dispatch(getAllPrograms());
+  }, [dispatch]);
+
+  // Fetch courses when program, level, and semester are selected
+  useEffect(() => {
+    if (program && level && semester) {
+      dispatch(fetchAvailableCourses({ program, level, semester }));
+    }
+  }, [program, level, semester, dispatch]);
+
+  // Handle errors
   useEffect(() => {
     if (courseError) {
       toast.error(courseError);
@@ -50,13 +63,6 @@ function CourseRegistrationForm() {
       dispatch({ type: 'programs/clearError' });
     }
   }, [courseError, programError, dispatch]);
-
-  useEffect(() => {
-    if (program && level && semester) {
-      dispatch(fetchAvailableCourses({ program, level, semester }));
-      dispatch(getAllPrograms())
-    }
-  }, [program, level, semester, dispatch]);
 
   const toggleCourse = (courseId) => {
     setSelectedCourses((prev) =>
@@ -90,6 +96,16 @@ function CourseRegistrationForm() {
     }
   };
 
+  if (programLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-700 dark:text-gray-300">Loading programs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -106,7 +122,6 @@ function CourseRegistrationForm() {
             Select your courses for the upcoming semester
           </p>
         </div>
-
         {/* Error Alerts */}
         {courseError && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
@@ -115,7 +130,6 @@ function CourseRegistrationForm() {
             </AlertDescription>
           </Alert>
         )}
-        
         {programError && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
             <AlertDescription className="text-red-800 dark:text-red-200">
@@ -123,7 +137,6 @@ function CourseRegistrationForm() {
             </AlertDescription>
           </Alert>
         )}
-
         {/* Registration Form */}
         <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
           <CardHeader>
@@ -150,29 +163,24 @@ function CourseRegistrationForm() {
                     control={control}
                     rules={{ required: 'Program is required' }}
                     render={({ field }) => (
-                      <div className="relative">
-                        <select
-                          id="program"
-                          {...field}
-                          className="w-full p-3 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        >
-                          <option value="">Select Program</option>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full dark:bg-gray-800 dark:border-emerald-800 dark:text-white">
+                          <SelectValue placeholder="Select Program" />
+                        </SelectTrigger>
+                        <SelectContent>
                           {programs.length === 0 ? (
-                            <option value="" disabled>No programs available</option>
+                            <SelectItem value="" disabled>No programs available</SelectItem>
                           ) : (
                             programs
-                              .filter((prog) => !user?.program || prog._id === user?.program?._id || prog._id === user?.program)
+                              .filter((prog) => !user?.program || prog._id === (user?.program?._id || user?.program))
                               .map((prog) => (
-                                <option key={prog._id} value={prog._id}>
+                                <SelectItem key={prog._id} value={prog._id}>
                                   {prog.name}
-                                </option>
+                                </SelectItem>
                               ))
                           )}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                          <Hash className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
+                        </SelectContent>
+                      </Select>
                     )}
                   />
                   {errors.program && (
@@ -182,7 +190,6 @@ function CourseRegistrationForm() {
                     </p>
                   )}
                 </div>
-
                 {/* Level Field */}
                 <div className="space-y-2">
                   <Label htmlFor="level" className="flex items-center">
@@ -194,23 +201,18 @@ function CourseRegistrationForm() {
                     control={control}
                     rules={{ required: 'Level is required' }}
                     render={({ field }) => (
-                      <div className="relative">
-                        <select
-                          id="level"
-                          {...field}
-                          className="w-full p-3 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        >
-                          <option value="">Select Level</option>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full dark:bg-gray-800 dark:border-emerald-800 dark:text-white">
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent>
                           {['100', '200', '300', '400', '500'].map((lvl) => (
-                            <option key={lvl} value={lvl}>
+                            <SelectItem key={lvl} value={lvl}>
                               {lvl}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                          <Hash className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
+                        </SelectContent>
+                      </Select>
                     )}
                   />
                   {errors.level && (
@@ -220,7 +222,6 @@ function CourseRegistrationForm() {
                     </p>
                   )}
                 </div>
-
                 {/* Semester Field */}
                 <div className="space-y-2">
                   <Label htmlFor="semester" className="flex items-center">
@@ -232,23 +233,18 @@ function CourseRegistrationForm() {
                     control={control}
                     rules={{ required: 'Semester is required' }}
                     render={({ field }) => (
-                      <div className="relative">
-                        <select
-                          id="semester"
-                          {...field}
-                          className="w-full p-3 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        >
-                          <option value="">Select Semester</option>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full dark:bg-gray-800 dark:border-emerald-800 dark:text-white">
+                          <SelectValue placeholder="Select Semester" />
+                        </SelectTrigger>
+                        <SelectContent>
                           {['First Semester', 'Second Semester'].map((sem) => (
-                            <option key={sem} value={sem}>
+                            <SelectItem key={sem} value={sem}>
                               {sem}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
+                        </SelectContent>
+                      </Select>
                     )}
                   />
                   {errors.semester && (
@@ -259,7 +255,6 @@ function CourseRegistrationForm() {
                   )}
                 </div>
               </div>
-
               {/* Course Selection */}
               {courseLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -277,7 +272,6 @@ function CourseRegistrationForm() {
                       {selectedCourses.length} selected
                     </Badge>
                   </div>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {availableCourses.map((course) => (
                       <div 
@@ -324,7 +318,6 @@ function CourseRegistrationForm() {
                   </p>
                 </div>
               )}
-
               {/* Submit Button */}
               <Button
                 type="submit"
@@ -337,9 +330,7 @@ function CourseRegistrationForm() {
                     Registering...
                   </>
                 ) : (
-                  <>
-                    Register Courses
-                  </>
+                  <>Register Courses</>
                 )}
               </Button>
             </form>
