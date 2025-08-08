@@ -190,18 +190,18 @@ const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48 mt-2" align="end">
-                    <DropdownMenuItem asChild>
+                    {/* <DropdownMenuItem asChild>
                       <NavLink to="/profile" className="flex items-center w-full">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </NavLink>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                    </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem asChild>
                       <NavLink to="/settings" className="flex items-center w-full">
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </NavLink>
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={handleLogout}
                       className="text-red-600"
