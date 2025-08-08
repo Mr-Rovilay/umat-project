@@ -50,7 +50,8 @@ io.on('connection', async (socket) => {
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adjust for production
+    origin: 'https://umat-project-school.onrender.com',
+    // origin: "http://localhost:5173", // Adjust for production
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     credentials: true,

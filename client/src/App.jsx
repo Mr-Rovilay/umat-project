@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { getUser } from "./redux/slice/authSlice";
 import Navbar from "./components/Navbar";
@@ -25,15 +24,6 @@ import CreateNewsPost from "./components/pages/CreateNewsPost";
 
 function App() {
   const [loading, setLoading] = useState(true);
-
-  // const dispatch = useDispatch();
-  // const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
-
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     dispatch(getUser());
-  //   }
-  // }, [dispatch, isAuthenticated, isLoading]);
 
   useEffect(() => {
     const fetchUser = async () => {
