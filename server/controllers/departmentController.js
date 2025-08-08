@@ -1,5 +1,7 @@
 import Department from '../models/Department.js';
 import mongoose from 'mongoose';
+import Program from '../models/Program.js';
+import Course from '../models/Course.js';
 
 // Create a new department
 export const createDepartment = async (req, res) => {
@@ -84,7 +86,7 @@ export const updateDepartment = async (req, res) => {
       id,
       { name, programs },
       { new: true, runValidators: true }
-    ).populate('programs', 'name degree');
+    )
 
     if (!department) {
       return res.status(404).json({ message: 'Department not found' });

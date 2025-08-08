@@ -15,15 +15,13 @@ import NewsPage from './components/pages/NewsPage';
 import ProgramsPage from './components/pages/ProgramsPage';
 import AboutPage from './components/pages/AboutPage';
 import Store from './redux/store';
-
-
-
+import AdminProgramManagement from './components/pages/AdminProgramManagement';
 
 function App() {
   const [loading, setLoading] = useState(true);
 
-  const dispatch = useDispatch();
-  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  // const dispatch = useDispatch();
+  // const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
 
     // useEffect(() => {
     //   if (isAuthenticated) {
@@ -45,8 +43,6 @@ function App() {
 
     fetchUser();
   }, []);
-
-
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -73,6 +69,14 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <AdminDepartmentManagement />
+              </ProtectedRoute>
+            }
+          />
+                    <Route
+            path="/dashboard/programs"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminProgramManagement />
               </ProtectedRoute>
             }
           />

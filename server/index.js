@@ -18,11 +18,36 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }, // Adjust for production
+  cors: {
+    origin: 'http://localhost:5173',
+    credentials: true,
+  },
 });
 
 // Store online users
 global.onlineUsers = [];
+
+io.on('connection', async (socket) => {
+  const token = socket.handshake.auth.token;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.userId).select('department');
+      if (user) {
+        const departmentIds = user.department ? [user.department.toString()] : [];
+        global.onlineUsers.push({ userId: decoded.userId, departmentIds });
+        socket.userId = decoded.userId;
+      }
+    } catch (error) {
+      console.error('Socket auth error:', error);
+    }
+  }
+
+  socket.on('disconnect', () => {
+    global.onlineUsers = global.onlineUsers.filter((u) => u.userId !== socket.userId);
+  });
+});
+
 app.use(
   cors({
     origin: "http://localhost:5173", // Adjust for production
@@ -52,29 +77,6 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/news", newsPostRoutes);
 app.use("/api/dashboard", adminDashboardRoutes);
 app.use("/api/payments", paymentRoutes);
-
-// Socket.IO connection
-io.on("connection", async (socket) => {
-  const userId = socket.handshake.query.userId;
-  if (userId && mongoose.isValidObjectId(userId)) {
-    const user = await User.findById(userId).select("department");
-    if (user) {
-      global.onlineUsers.push({
-        userId,
-        departmentIds: user.department.map((d) => d.toString()),
-        socketId: socket.id,
-      });
-      io.emit("onlineUsersUpdate", global.onlineUsers.length);
-    }
-  }
-
-  socket.on("disconnect", () => {
-    global.onlineUsers = global.onlineUsers.filter(
-      (u) => u.socketId !== socket.id
-    );
-    io.emit("onlineUsersUpdate", global.onlineUsers.length);
-  });
-});
 
 app.get("/", (req, res) => {
   res.send("api backend working");

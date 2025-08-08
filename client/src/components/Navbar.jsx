@@ -73,7 +73,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav
+     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'bg-gradient-to-r from-emerald-700/95 via-green-800/95 to-teal-800/95 dark:from-gray-900/95 dark:via-gray-800/95 dark:to-gray-900/95 shadow-xl backdrop-blur-md'
@@ -118,7 +118,7 @@ const Navbar = () => {
               >
                 Home
               </NavLink>
-              <NavLink
+              {/* <NavLink
                 to="/about"
                 className={({ isActive }) =>
                   `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -129,7 +129,7 @@ const Navbar = () => {
                 }
               >
                 About
-              </NavLink>
+              </NavLink> */}
               <NavLink
                 to="/programs"
                 className={({ isActive }) =>
@@ -142,6 +142,7 @@ const Navbar = () => {
               >
                 Programs
               </NavLink>
+               {user?.role === 'student' && (
               <NavLink
                 to="/news"
                 className={({ isActive }) =>
@@ -154,6 +155,8 @@ const Navbar = () => {
               >
                 News
               </NavLink>
+               )}
+             {user?.role === 'student' && (
               <NavLink
                 to="/departments"
                 className={({ isActive }) =>
@@ -166,6 +169,7 @@ const Navbar = () => {
               >
                 Departments
               </NavLink>
+               )}
               {user?.role === 'admin' && (
                 <NavLink
                   to="/dashboard"
@@ -192,6 +196,20 @@ const Navbar = () => {
                   }
                 >
                   Manage Departments
+                </NavLink>
+              )}
+              {user?.role === 'admin' && (
+                <NavLink
+                  to="/dashboard/programs"
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                        : 'text-green-100 hover:bg-white/10 hover:text-white'
+                    }`
+                  }
+                >
+                  Manage Programs
                 </NavLink>
               )}
               {isAuthenticated && user?.role === 'student' && (
@@ -308,7 +326,7 @@ const Navbar = () => {
                     Home
                   </NavLink>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <NavLink
                     to="/about"
                     onClick={handleMobileLinkClick}
@@ -316,7 +334,7 @@ const Navbar = () => {
                   >
                     About
                   </NavLink>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem asChild>
                   <NavLink
                     to="/programs"
@@ -362,6 +380,15 @@ const Navbar = () => {
                         className="flex items-center w-full px-2 py-2"
                       >
                         Manage Departments
+                      </NavLink>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <NavLink
+                        to="/dashboard/programs"
+                        onClick={handleMobileLinkClick}
+                        className="flex items-center w-full px-2 py-2"
+                      >
+                        Manage Programs
                       </NavLink>
                     </DropdownMenuItem>
                   </>
