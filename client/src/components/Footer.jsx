@@ -32,7 +32,7 @@ const Footer = () => {
           {/* About Column */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <img src="/UMat-logo.png" alt="UMat Logo" className="h-10 w-10" />
+              <img src="/umat-logo.png" alt="UMat Logo" className="h-10 w-10" />
               <div>
                 <div className="text-xl font-bold">UMat</div>
                 <div className="text-xs text-gray-400">University of Mines and Technology</div>

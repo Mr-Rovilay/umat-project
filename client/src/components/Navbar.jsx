@@ -84,7 +84,7 @@ const Navbar = () => {
           >
             <div className="relative">
               <img
-                src="/UMat-logo.png"
+                src="/umat-logo.png"
                 alt="UMat Logo"
                 className="h-10 w-10 object-contain group-hover:scale-105 transition-transform duration-200"
               />
@@ -244,7 +244,7 @@ const Navbar = () => {
                 <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-2">
                     <img
-                      src="/UMat-logo.png"
+                      src="/umat-logo.png"
                       alt="UMat Logo"
                       className="h-6 w-6"
                     />
