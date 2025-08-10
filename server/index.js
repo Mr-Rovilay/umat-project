@@ -12,6 +12,7 @@ import departmentRoutes from "./routes/departmentRoutes.js";
 import newsPostRoutes from "./routes/newsPostRoutes.js";
 import adminDashboardRoutes from "./routes/adminDashboardRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import User from "./models/User.js";
 
 const PORT = process.env.PORT || 5000;
 
