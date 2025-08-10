@@ -54,22 +54,7 @@ function StudentDashboard() {
           <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Completed</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">12</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Courses finished</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">GPA</CardTitle>
+                <CardTitle className="text-lg">CWA</CardTitle>
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                   <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -78,21 +63,6 @@ function StudentDashboard() {
             <CardContent>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">3.75</div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Current average</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Credits</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <Award className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">78</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Out of 120</p>
             </CardContent>
           </Card>
         </div>
@@ -180,7 +150,7 @@ function StudentDashboard() {
         </div>
 
         {/* Upcoming Deadlines */}
-        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-10">
+        {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-10">
           <CardHeader>
             <CardTitle className="text-xl flex items-center">
               <Calendar className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -226,10 +196,10 @@ function StudentDashboard() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Recent Announcements */}
-        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
+        {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl flex items-center">
               <AlertCircle className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -266,7 +236,7 @@ function StudentDashboard() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

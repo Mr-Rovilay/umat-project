@@ -18,11 +18,11 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { name: "Facebook", icon: "📘", href: "https://facebook.com/umat" },
-    { name: "Twitter", icon: "🐦", href: "https://twitter.com/umat" },
-    { name: "LinkedIn", icon: "💼", href: "https://linkedin.com/school/umat" },
-    { name: "YouTube", icon: "📺", href: "https://youtube.com/umat" },
-    { name: "Instagram", icon: "📷", href: "https://instagram.com/umat" }
+    { name: "Facebook", icon: "📘", href: "https://facebook.com/UMat" },
+    { name: "Twitter", icon: "🐦", href: "https://twitter.com/UMat" },
+    { name: "LinkedIn", icon: "💼", href: "https://linkedin.com/school/UMat" },
+    { name: "YouTube", icon: "📺", href: "https://youtube.com/UMat" },
+    { name: "Instagram", icon: "📷", href: "https://instagram.com/UMat" }
   ];
 
   return (
@@ -32,9 +32,9 @@ const Footer = () => {
           {/* About Column */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <img src="/umat-logo.png" alt="UMAT Logo" className="h-10 w-10" />
+              <img src="/UMat-logo.png" alt="UMat Logo" className="h-10 w-10" />
               <div>
-                <div className="text-xl font-bold">UMAT</div>
+                <div className="text-xl font-bold">UMat</div>
                 <div className="text-xs text-gray-400">University of Mines and Technology</div>
               </div>
             </div>
@@ -85,7 +85,7 @@ const Footer = () => {
               <div>University of Mines and Technology</div>
               <div>P.O. Box 237, Tarkwa, Ghana</div>
               <div>📞 +233 3123 45678</div>
-              <div>✉️ info@umat.edu.gh</div>
+              <div>✉️ info@UMat.edu.gh</div>
             </address>
           </div>
         </div>

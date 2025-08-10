@@ -70,7 +70,7 @@ const AboutSection = () => {
       label: 'Global Impact',
       content: {
         title: 'Transforming Industries Worldwide',
-        description: 'Our graduates and research initiatives have made significant contributions to mining operations, environmental sustainability, and technological advancement across Africa and beyond, establishing UMAT as a globally recognized center of excellence.',
+        description: 'Our graduates and research initiatives have made significant contributions to mining operations, environmental sustainability, and technological advancement across Africa and beyond, establishing UMat as a globally recognized center of excellence.',
         highlights: [
           'Alumni in 50+ countries',
           '200+ industry partnerships',
@@ -121,7 +121,7 @@ const AboutSection = () => {
             <span>Tarkwa, Western Region, Ghana</span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            About <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">UMAT</span>
+            About <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">UMat</span>
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Ghana's premier institution for mining, engineering, and technology education since 1952
@@ -189,7 +189,7 @@ const AboutSection = () => {
               {/* CTA Button */}
               <div className="pt-4">
                 <button className="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
-                  Learn More About UMAT
+                  Learn More About UMat
                   <Award className="ml-2 h-4 w-4" />
                 </button>
               </div>
@@ -203,7 +203,7 @@ const AboutSection = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img 
                   src="/campus.jpg" 
-                  alt="UMAT Campus" 
+                  alt="UMat Campus" 
                   className="w-full h-80 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>

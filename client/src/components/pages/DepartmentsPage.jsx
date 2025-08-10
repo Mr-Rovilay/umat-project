@@ -60,46 +60,6 @@ const DepartmentsPage = () => {
               </div>
             </div>
           </div>
-
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                      Faculty Members
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      200+
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                      Programs Offered
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      45+
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Departments Grid */}
@@ -179,32 +139,6 @@ const DepartmentsPage = () => {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Call to Action */}
-        <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Interested in Joining a Department?
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6">
-              Learn more about our academic programs, faculty, and research opportunities across all departments.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/programs"
-                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-              >
-                Explore Programs
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ const CallToActionSection = () => {
     <section className="py-20 bg-gradient-to-r from-emerald-700 to-teal-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-4xl font-bold text-white mb-6">
-          Ready to Join <span className="text-emerald-200">UMAT</span>?
+          Ready to Join <span className="text-emerald-200">UMat</span>?
         </h2>
         <p className="text-xl text-emerald-100 max-w-3xl mx-auto mb-10">
           Start your journey towards becoming a leader in mining, engineering, and technology. Apply now to join our community of innovators.

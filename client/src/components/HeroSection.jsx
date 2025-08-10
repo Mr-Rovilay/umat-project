@@ -156,7 +156,7 @@ const HeroSection = () => {
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
                   <img 
                     src={slides[currentSlide].image} 
-                    alt="UMAT Campus"
+                    alt="UMat Campus"
                     className="w-full h-96 lg:h-[500px] object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>

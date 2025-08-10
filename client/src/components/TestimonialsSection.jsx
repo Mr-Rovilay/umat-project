@@ -3,19 +3,19 @@ import React from 'react'
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      quote: "UMAT provided me with the technical skills and industry exposure needed to excel in my career. The practical approach to education is unmatched.",
+      quote: "UMat provided me with the technical skills and industry exposure needed to excel in my career. The practical approach to education is unmatched.",
       name: "Kwame Asante",
       role: "Mining Engineer, Class of 2015",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
     },
     {
-      quote: "The research opportunities at UMAT are incredible. I was able to work on cutting-edge projects that made a real impact in the industry.",
+      quote: "The research opportunities at UMat are incredible. I was able to work on cutting-edge projects that made a real impact in the industry.",
       name: "Ama Mensah",
       role: "Research Scientist, Class of 2018",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
     },
     {
-      quote: "The supportive community and world-class faculty at UMAT helped me develop both professionally and personally. I'm proud to be an alumna.",
+      quote: "The supportive community and world-class faculty at UMat helped me develop both professionally and personally. I'm proud to be an alumna.",
       name: "Kojo Johnson",
       role: "Software Engineer, Class of 2020",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
@@ -30,7 +30,7 @@ const TestimonialsSection = () => {
             What Our <span className="text-emerald-200">Alumni Say</span>
           </h2>
           <p className="text-lg text-emerald-100 max-w-3xl mx-auto">
-            Hear from our successful graduates about their experience at UMAT.
+            Hear from our successful graduates about their experience at UMat.
           </p>
         </div>
         

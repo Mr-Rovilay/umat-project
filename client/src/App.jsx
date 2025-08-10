@@ -21,6 +21,7 @@ import CreateCourse from "./components/pages/CreateCourse";
 import ManageCourses from "./components/pages/ManageCourses";
 import News from "./components/pages/News";
 import CreateNewsPost from "./components/pages/CreateNewsPost";
+import Profile from "./components/pages/Profile";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,9 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/programs" element={<ProgramsPage />} />
+           <Route path="/profile" element={  <ProtectedRoute role="student">
+                    <Profile />
+                  </ProtectedRoute>} />
           <Route path="/departments" element={<DepartmentsPage />} />
                         <Route path="/news" element={<News />} />
               <Route path="/news/create" element={<ProtectedRoute role="admin"><CreateNewsPost /></ProtectedRoute>} />

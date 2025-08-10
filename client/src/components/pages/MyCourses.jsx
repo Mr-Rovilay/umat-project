@@ -1,10 +1,12 @@
-import { clearError, fetchMyCourses } from '@/redux/slice/courseSlice';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   BookOpen,
   Hash,
@@ -14,6 +16,7 @@ import {
   GraduationCap,
   Clock
 } from 'lucide-react';
+import { clearError, fetchMyCourses } from '@/redux/slice/courseSlice';
 
 function MyCourses() {
   const dispatch = useDispatch();
@@ -30,11 +33,15 @@ function MyCourses() {
     dispatch(fetchMyCourses());
   }, [dispatch]);
 
+  const handleRetry = () => {
+    dispatch(fetchMyCourses());
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <Loader2 className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-700 dark:text-gray-300">Loading your courses...</p>
         </div>
       </div>
@@ -60,8 +67,16 @@ function MyCourses() {
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
-            <AlertDescription className="text-red-800 dark:text-red-200">
-              {error}
+            <AlertDescription className="text-red-800 dark:text-red-200 flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-200 dark:hover:bg-red-900/30"
+              >
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         )}
@@ -74,9 +89,15 @@ function MyCourses() {
                 <AlertCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Courses Found</h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-md">
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mb-4">
                 You haven't registered for any courses yet. Please visit the course registration page to enroll in courses.
               </p>
+              <Button
+                asChild
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+              >
+                <Link to="/courses/register">Register Courses</Link>
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -87,7 +108,7 @@ function MyCourses() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                     <CardTitle className="text-xl flex items-center text-emerald-800 dark:text-emerald-200">
                       <BookOpen className="mr-2 h-5 w-5" />
-                      {registration.program.name}
+                      {registration.program.name} ({registration.program.degree})
                     </CardTitle>
                     <div className="flex gap-3">
                       <Badge variant="outline" className="flex items-center gap-1 border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300">
@@ -98,10 +119,14 @@ function MyCourses() {
                         <Calendar className="h-3 w-3" />
                         {registration.semester}
                       </Badge>
+                      <Badge variant="outline" className="flex items-center gap-1 border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300">
+                        <Clock className="h-3 w-3" />
+                        Registered {format(parseISO(registration.createdAt), 'MMM d, yyyy')}
+                      </Badge>
                     </div>
                   </div>
                   <CardDescription className="text-emerald-700 dark:text-emerald-300">
-                    {registration.courses.length} course{registration.courses.length !== 1 ? 's' : ''} registered
+                    {registration.courses.length} course{registration.courses.length !== 1 ? 's' : ''} registered • Total {registration.courses.reduce((sum, course) => sum + (course.unit || 0), 0)} units
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -113,13 +138,13 @@ function MyCourses() {
                             <h3 className="font-semibold text-gray-900 dark:text-white">{course.title}</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{course.code}</p>
                           </div>
-                          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200">
+                          <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800">
                             {course.unit} unit{course.unit !== 1 ? 's' : ''}
                           </Badge>
                         </div>
                         <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
                           <Clock className="mr-1 h-4 w-4" />
-                          <span>Registered</span>
+                          <span>{course.semester}</span>
                         </div>
                       </div>
                     ))}

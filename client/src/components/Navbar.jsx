@@ -84,15 +84,15 @@ const Navbar = () => {
           >
             <div className="relative">
               <img
-                src="/umat-logo.png"
-                alt="UMAT Logo"
+                src="/UMat-logo.png"
+                alt="UMat Logo"
                 className="h-10 w-10 object-contain group-hover:scale-105 transition-transform duration-200"
               />
               <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-white tracking-tight">
-                UMAT
+                UMat
               </span>
               <span className="text-xs text-green-100 font-medium tracking-wide hidden sm:block">
                 Knowledge | Truth | Excellence
@@ -158,7 +158,7 @@ const Navbar = () => {
                     }`
                   }
                 >
-                  Student Portal
+                 Student Dashboard
                 </NavLink>
               )}
             </div>
@@ -190,12 +190,14 @@ const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48 mt-2" align="end">
-                    {/* <DropdownMenuItem asChild>
+                     {user?.role === 'student' && (
+                    <DropdownMenuItem asChild>
                       <NavLink to="/profile" className="flex items-center w-full">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </NavLink>
-                    </DropdownMenuItem> */}
+                    </DropdownMenuItem>
+                     )}
                     {/* <DropdownMenuItem asChild>
                       <NavLink to="/settings" className="flex items-center w-full">
                         <Settings className="mr-2 h-4 w-4" />
@@ -242,12 +244,12 @@ const Navbar = () => {
                 <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-2">
                     <img
-                      src="/umat-logo.png"
-                      alt="UMAT Logo"
+                      src="/UMat-logo.png"
+                      alt="UMat Logo"
                       className="h-6 w-6"
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold">UMAT</span>
+                      <span className="text-sm font-semibold">UMat</span>
                       <span className="text-xs text-gray-500">Knowledge | Truth | Excellence</span>
                     </div>
                   </div>
@@ -295,7 +297,8 @@ const Navbar = () => {
                 <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
                   {isAuthenticated ? (
                     <>
-                      {/* <DropdownMenuItem asChild>
+                        {user?.role === 'student' && (
+                      <DropdownMenuItem asChild>
                         <NavLink
                           to="/profile"
                           onClick={handleMobileLinkClick}
@@ -305,7 +308,8 @@ const Navbar = () => {
                           <span>Profile</span>
                         </NavLink>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
+                        )}
+                      {/* <DropdownMenuItem asChild>
                         <NavLink
                           to="/settings"
                           onClick={handleMobileLinkClick}
