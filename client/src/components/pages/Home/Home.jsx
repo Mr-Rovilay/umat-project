@@ -4,7 +4,7 @@ import HeroSection from '@/components/HeroSection'
 const Home = () => {
   return (
     <div className=''>
-        <HeroSection/>
+      <Login/>
     </div>
   )
 }
