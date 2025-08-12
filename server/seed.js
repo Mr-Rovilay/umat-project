@@ -12,14 +12,6 @@ mongoose.connect(process.env.MONGODB_URL, {
 
 const seedAdmins = async () => {
   try {
-    console.log('Starting admin seeding...');
-    
-    // Clear existing admins
-    console.log('Clearing existing admins...');
-    await User.deleteMany({ role: 'admin' });
-    
-    // Clear existing admins from all departments
-    console.log('Clearing existing admins from departments...');
     await Department.updateMany(
       {},
       { $set: { admins: [] } }
@@ -66,9 +58,7 @@ const seedAdmins = async () => {
     ];
 
     // Create admins
-    console.log('Creating admins...');
     const createdAdmins = await User.insertMany(admins);
-    console.log(`${createdAdmins.length} admins created successfully`);
 
     // Create a mapping of department IDs to admin IDs
     const departmentAdminMap = {
@@ -79,7 +69,6 @@ const seedAdmins = async () => {
     };
 
     // Update each department with its admin(s)
-    console.log('Updating departments with admin IDs...');
     for (const [departmentId, adminIds] of Object.entries(departmentAdminMap)) {
       const department = await Department.findById(departmentId);
       if (!department) {
@@ -91,11 +80,7 @@ const seedAdmins = async () => {
         departmentId,
         { $addToSet: { admins: { $each: adminIds } } }
       );
-      
-      console.log(`Updated department ${departmentId} with admin IDs: ${adminIds.join(', ')}`);
     }
-
-    console.log('Admin seeding completed successfully!');
     process.exit();
   } catch (err) {
     console.error('Seeding error:', err);

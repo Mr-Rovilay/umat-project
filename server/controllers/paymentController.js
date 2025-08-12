@@ -14,8 +14,6 @@ export const initializePayment = async (req, res) => {
     const { registrationId, amount, paymentType } = req.body;
     const studentId = req.user._id;
     
-    console.log('Payment initialization request:', { registrationId, amount, paymentType, studentId });
-    
     if (!registrationId || !amount || !paymentType) {
       return res.status(400).json({
         success: false,
@@ -80,9 +78,6 @@ export const initializePayment = async (req, res) => {
       }
     };
     
-console.log('Sending to Paystack:', paystackPayload);
-    console.log('Paystack URL:', `${PAYSTACK_BASE_URL}/transaction/initialize`);
-    
     // Initialize payment with Paystack
     const response = await axios.post(
       `${PAYSTACK_BASE_URL}/transaction/initialize`,
@@ -94,9 +89,6 @@ console.log('Sending to Paystack:', paystackPayload);
         }
       }
     );
-    
-    console.log('Paystack response:', response.data);
-    
     if (!response.data.status) {
       return res.status(400).json({
         success: false,
@@ -108,8 +100,6 @@ console.log('Sending to Paystack:', paystackPayload);
     // Update payment with Paystack data
     payment.paystackData = response.data.data;
     await payment.save();
-    
-    console.log('Updated payment:', payment);
     
     res.status(200).json({
       success: true,

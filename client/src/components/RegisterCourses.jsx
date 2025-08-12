@@ -174,7 +174,6 @@ const handleSubmit = async (e) => {
     
     if (result.meta.requestStatus === 'fulfilled') {
       const response = result.payload;
-      console.log('Registration response:', response); // For debugging
       
       if (response.success && response.data) {
         if (response.data.paymentRequired) {
@@ -244,8 +243,6 @@ const handleSubmit = async (e) => {
         paymentType: registrationData.paymentDetails?.type || 
                    (registrationData.semester === 'First Semester' ? 'departmental_dues' : 'school_fees'),
       };
-
-      console.log('Sending payment data:', paymentData); // For debugging
 
       const result = await dispatch(initializePayment(paymentData));
       
