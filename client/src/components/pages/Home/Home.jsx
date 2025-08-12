@@ -1,4 +1,4 @@
-import HeroSection from '@/components/HeroSection'
+import Login from '../auth/Login'
 
 
 const Home = () => {
