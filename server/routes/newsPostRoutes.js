@@ -1,3 +1,4 @@
+// routes/newsRoutes.js (unchanged)
 import express from 'express';
 import {
   createNewsPost,
@@ -22,14 +23,14 @@ const upload = multer({ storage });
 const router = express.Router();
 
 // Admin routes
-router.post('/', protect, restrictTo("admin"), upload.array('images', 5), createNewsPost); // Create news post with up to 5 images
-router.put('/:id',  protect, restrictTo("admin"), upload.array('images', 5), editNewsPost); // Edit news post
-router.delete('/:id',  protect, restrictTo("admin"),deleteNewsPost); // Delete news post
+router.post('/', protect,  upload.array('images', 5), createNewsPost); // Create news post with up to 5 images
+router.put('/:id', protect, restrictTo('admin'), upload.array('images', 5), editNewsPost); // Edit news post
+router.delete('/:id', protect, restrictTo('admin'), deleteNewsPost); // Delete news post
 
 // Student routes
 router.get('/', protect, getNewsPosts); // Get news posts by department
-router.post('/:id/like', protect, restrictTo("student"), likeNewsPost); // Like/unlike a post
-router.post('/:id/comment', protect, restrictTo("student"), commentNewsPost); // Comment on a post
-router.post('/:id/react', protect, restrictTo("student"), reactNewsPost); // React to a post
+router.post('/:id/like', protect, restrictTo('student'), likeNewsPost); // Like/unlike a post
+router.post('/:id/comment', protect, restrictTo('student'), commentNewsPost); // Comment on a post
+router.post('/:id/react', protect, restrictTo('student'), reactNewsPost); // React to a post
 
 export default router;

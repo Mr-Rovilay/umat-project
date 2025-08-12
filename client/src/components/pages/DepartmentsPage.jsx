@@ -1,13 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle, Building, Users, BookOpen, ArrowRight } from 'lucide-react';
-import { getAllDepartments } from '@/redux/slice/departmentSlice';
+import { Loader2, AlertCircle, Building, Newspaper, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { getAllDepartments, clearError } from '@/redux/slice/departmentSlice';
 
 const DepartmentsPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { departments, isLoading, error } = useSelector((state) => state.departments);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     dispatch(getAllDepartments());
@@ -16,126 +22,112 @@ const DepartmentsPage = () => {
   useEffect(() => {
     if (error) {
       toast.error(error);
-      dispatch({ type: 'department/clearError' });
+      dispatch(clearError());
     }
   }, [error, dispatch]);
 
+  const filteredDepartments = departments.filter((dept) =>
+    dept.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleViewNews = (deptId) => {
+    navigate(`/news?department=${deptId}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
-              <span className="block">Academic</span>
-              <span className="block text-emerald-200">Departments</span>
-            </h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-emerald-100 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Explore our diverse range of departments dedicated to excellence in teaching, research, and innovation.
-            </p>
-          </div>
+      <div className="relative bg-gradient-to-r from-emerald-600 to-teal-600 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent)]" />
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white animate-fade-in-down">
+            Academic Departments
+          </h1>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-emerald-100 animate-fade-in-up">
+            Discover our vibrant academic communities driving innovation and learning.
+          </p>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-12">
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-emerald-500 rounded-md p-3">
-                  <Building className="h-6 w-6 text-white" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                      Total Departments
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      {isLoading ? '-' : departments.length}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
+        <div className="mb-8 flex justify-center">
+          <Badge variant="secondary" className="text-lg px-4 py-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+            <Building className="h-5 w-5 mr-2" />
+            {isLoading ? '-' : departments.length} {departments.length === 1 ? 'Department' : 'Departments'}
+          </Badge>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8 max-w-md mx-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search departments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 rounded-full"
+            />
           </div>
         </div>
 
         {/* Departments Grid */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">All Departments</h2>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {departments.length} departments
-            </div>
-          </div>
-
+        <div>
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
+            <div className="flex justify-center items-center py-16">
               <div className="text-center">
                 <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400">Loading departments...</p>
               </div>
             </div>
           ) : error ? (
-            <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded">
+            <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700 dark:text-red-300">
-                    {error}
-                  </p>
-                </div>
+                <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
               </div>
             </div>
-          ) : departments.length === 0 ? (
-            <div className="text-center py-12">
+          ) : filteredDepartments.length === 0 ? (
+            <div className="text-center py-16">
               <div className="mx-auto h-24 w-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                 <Building className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No departments found</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Departments Found</h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                There are currently no departments available. Please check back later.
+                {searchQuery ? 'No departments match your search.' : 'No departments are currently available.'}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {departments.map((dept) => (
-                <Link
-                  to={`/departments/${dept._id}`}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDepartments.map((dept) => (
+                <Card
                   key={dept._id}
-                  className="group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg p-3 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/50 transition-colors">
-                        <Building className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <h3 className="ml-4 text-lg font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                        {dept.name}
-                      </h3>
-                    </div>
-                    
-                    <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                      {dept.description || 'Explore the programs and research opportunities in this department.'}
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg font-semibold text-gray-900 dark:text-white">
+                      <Building className="h-6 w-6 text-emerald-600 dark:text-emerald-400 mr-2" />
+                      {dept.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      Managed by:{' '}
+                      {dept.admins?.length > 0
+                        ? dept.admins.map((admin) => `${admin.firstName} ${admin.lastName}`).join(', ')
+                        : 'No admins assigned'}
                     </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <Users className="h-4 w-4 mr-1" />
-                        <span>{dept.facultyCount || '20+'} Faculty</span>
-                      </div>
-                      
-                      <div className="flex items-center text-emerald-600 dark:text-emerald-400 font-medium text-sm group-hover:translate-x-1 transition-transform">
-                        <span>View details</span>
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                    <Button
+                      onClick={() => handleViewNews(dept._id)}
+                      className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+                    >
+                      <Newspaper className="h-4 w-4 mr-2" />
+                      View Department News
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

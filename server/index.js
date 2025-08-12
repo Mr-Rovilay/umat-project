@@ -12,7 +12,9 @@ import departmentRoutes from "./routes/departmentRoutes.js";
 import newsPostRoutes from "./routes/newsPostRoutes.js";
 import adminDashboardRoutes from "./routes/adminDashboardRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import departmentAdminRoutes from "./routes/departmentAdminRoutes.js";
 import User from "./models/User.js";
+import uploadRoutes from './routes/uploadRoutes.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -25,34 +27,28 @@ const io = new Server(server, {
   },
 });
 
-// Store online users
-global.onlineUsers = [];
+global.io = io; // Make io accessible globally for controllers
 
 io.on('connection', async (socket) => {
-  const token = socket.handshake.auth.token;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.userId).select('department');
-      if (user) {
-        const departmentIds = user.department ? [user.department.toString()] : [];
-        global.onlineUsers.push({ userId: decoded.userId, departmentIds });
-        socket.userId = decoded.userId;
-      }
-    } catch (error) {
-      console.error('Socket auth error:', error);
-    }
-  }
+  console.log('User connected:', socket.id);
 
-  socket.on('disconnect', () => {
-    global.onlineUsers = global.onlineUsers.filter((u) => u.userId !== socket.userId);
+  socket.on('login', async (userId) => {
+    socket.join(userId);
+    const activeStudents = await User.countDocuments({ isOnline: true, role: 'student' });
+    io.emit('activeStudents', activeStudents); // Broadcast to all clients
+  });
+
+  socket.on('disconnect', async () => {
+    console.log('User disconnected:', socket.id);
+    const activeStudents = await User.countDocuments({ isOnline: true, role: 'student' });
+    io.emit('activeStudents', activeStudents);
   });
 });
 
 app.use(
   cors({
-    origin: 'https://umat-project-school.onrender.com',
-    // origin: "http://localhost:5173", // Adjust for production
+    origin: "https://umat-project-school.onrender.com",
+    // origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     credentials: true,
@@ -77,17 +73,18 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/programs", programRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/news", newsPostRoutes);
-app.use("/api/dashboard", adminDashboardRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use("/api/admin", adminDashboardRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/department-admin", departmentAdminRoutes);
 
 app.get("/", (req, res) => {
   res.send("api backend working");
 });
 
-// Connect to the database and start the server
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
   })

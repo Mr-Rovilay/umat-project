@@ -19,7 +19,7 @@ export const fetchDashboardStats = createAsyncThunk(
   'dashboard/fetchDashboardStats',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/api/dashboard/stats');
+      const response = await api.get('/api/admin/analytics');
       return response.data.stats;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch dashboard stats');

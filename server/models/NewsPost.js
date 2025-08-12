@@ -1,3 +1,4 @@
+// models/NewsPost.js (unchanged)
 import mongoose from 'mongoose';
 
 const newsPostSchema = new mongoose.Schema(

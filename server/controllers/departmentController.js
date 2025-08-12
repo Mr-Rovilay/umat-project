@@ -1,29 +1,50 @@
+// controllers/departmentController.js
 import Department from '../models/Department.js';
-import mongoose from 'mongoose';
 import Program from '../models/Program.js';
 import Course from '../models/Course.js';
+import User from '../models/User.js';
+import mongoose from 'mongoose';
 
 // Create a new department
 export const createDepartment = async (req, res) => {
   try {
-    const { name, programs } = req.body;
+    const { name, programs, admins } = req.body;
 
-    // Validate required fields
     if (!name) {
       return res.status(400).json({ message: 'Department name is required' });
     }
 
-    // Validate program IDs if provided
-    // if (programs && !programs.every(id => mongoose.isValidObjectId(id))) {
-    //   return res.status(400).json({ message: 'Invalid program ID(s)' });
-    // }
+    // Validate admin access
+    const user = await User.findById(req.user._id).populate('department', 'name');
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can create departments' });
+    }
 
-    const department = new Department({ name, programs });
+    // Validate program IDs if provided
+    if (programs && !programs.every(id => mongoose.isValidObjectId(id))) {
+      return res.status(400).json({ message: 'Invalid program ID(s)' });
+    }
+
+    // Validate admin IDs if provided
+    if (admins && !admins.every(id => mongoose.isValidObjectId(id))) {
+      return res.status(400).json({ message: 'Invalid admin ID(s)' });
+    }
+
+    const department = new Department({ name, programs, admins });
     await department.save();
 
-    // Populate programs for response
-    // const populatedDepartment = await Department.find();
-    res.status(201).json({ message: 'Department created successfully'});
+    // Update admins' department array
+    if (admins && admins.length > 0) {
+      await User.updateMany(
+        { _id: { $in: admins } },
+        { $addToSet: { department: department._id } }
+      );
+    }
+
+    const populatedDepartment = await Department.findById(department._id)
+      .populate('admins', 'firstName lastName email')
+      .populate('programs', 'name degree');
+    res.status(201).json({ message: 'Department created successfully', department: populatedDepartment });
   } catch (error) {
     console.error('Create department error:', error);
     if (error.code === 11000) {
@@ -36,7 +57,13 @@ export const createDepartment = async (req, res) => {
 // Get all departments
 export const getAllDepartments = async (req, res) => {
   try {
-    const departments = await Department.find();
+    const user = await User.findById(req.user?._id).populate('department', 'name');
+    const departmentIds = user?.department?.map(d => d._id.toString()) || [];
+    const query = user?.role === 'admin' && departmentIds.length > 0 ? { _id: { $in: departmentIds } } : {};
+
+    const departments = await Department.find(query)
+      .populate('admins', 'firstName lastName email')
+      .populate('programs', 'name degree');
     res.status(200).json({ departments });
   } catch (error) {
     console.error('Get departments error:', error);
@@ -49,12 +76,18 @@ export const getDepartment = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate department ID
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid department ID' });
     }
 
-    const department = await Department.findById(id).populate('programs', 'name degree');
+    const user = await User.findById(req.user._id).populate('department', 'name');
+    if (user.role === 'admin' && !user.department.some(d => d._id.toString() === id)) {
+      return res.status(403).json({ message: 'You are not authorized to access this department' });
+    }
+
+    const department = await Department.findById(id)
+      .populate('admins', 'firstName lastName email')
+      .populate('programs', 'name degree');
     if (!department) {
       return res.status(404).json({ message: 'Department not found' });
     }
@@ -70,26 +103,51 @@ export const getDepartment = async (req, res) => {
 export const updateDepartment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, programs } = req.body;
+    const { name, programs, admins } = req.body;
 
-    // Validate department ID
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid department ID' });
     }
 
-    // Validate program IDs if provided
+    const user = await User.findById(req.user._id).populate('department', 'name');
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can update departments' });
+    }
+    if (!user.department.some(d => d._id.toString() === id)) {
+      return res.status(403).json({ message: 'You are not authorized to update this department' });
+    }
+
     if (programs && !programs.every(id => mongoose.isValidObjectId(id))) {
       return res.status(400).json({ message: 'Invalid program ID(s)' });
     }
 
+    if (admins && !admins.every(id => mongoose.isValidObjectId(id))) {
+      return res.status(400).json({ message: 'Invalid admin ID(s)' });
+    }
+
     const department = await Department.findByIdAndUpdate(
       id,
-      { name, programs },
+      { name, programs, admins },
       { new: true, runValidators: true }
     )
+      .populate('admins', 'firstName lastName email')
+      .populate('programs', 'name degree');
 
     if (!department) {
       return res.status(404).json({ message: 'Department not found' });
+    }
+
+    // Update admins' department array
+    if (admins && admins.length > 0) {
+      await User.updateMany(
+        { _id: { $in: admins } },
+        { $addToSet: { department: department._id } }
+      );
+      // Remove department from users not in the updated admins list
+      await User.updateMany(
+        { department: department._id, _id: { $nin: admins } },
+        { $pull: { department: department._id } }
+      );
     }
 
     res.status(200).json({ department });
@@ -102,11 +160,21 @@ export const updateDepartment = async (req, res) => {
   }
 };
 
+// Delete a department by ID
 export const deleteDepartment = async (req, res) => {
   try {
     const { id } = req.params;
+
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid department ID' });
+    }
+
+    const user = await User.findById(req.user._id).populate('department', 'name');
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can delete departments' });
+    }
+    if (!user.department.some(d => d._id.toString() === id)) {
+      return res.status(403).json({ message: 'You are not authorized to delete this department' });
     }
 
     // Check for dependent programs
@@ -125,6 +193,12 @@ export const deleteDepartment = async (req, res) => {
     if (!department) {
       return res.status(404).json({ message: 'Department not found' });
     }
+
+    // Remove department from users
+    await User.updateMany(
+      { department: id },
+      { $pull: { department: id } }
+    );
 
     res.status(200).json({ message: 'Department deleted successfully' });
   } catch (error) {

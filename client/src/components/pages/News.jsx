@@ -1,572 +1,179 @@
-import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
-import { clearError, fetchNewsPosts } from "@/redux/slice/newsSlice";
-import { getAllDepartments } from "@/redux/slice/departmentSlice";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useEffect, useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Calendar, 
+  Search, 
+  Filter, 
+  Heart, 
+  MessageCircle, 
+  Smile, 
+  Clock, 
+  User, 
+  Building,
+  BookOpen,
+  ArrowLeft,
+  Loader2,
+  X
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { fetchNewsPosts, likeNewsPost, commentNewsPost, reactNewsPost } from '@/redux/slice/newsSlice';
+import { getAllDepartments } from '@/redux/slice/departmentSlice';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  FileText,
-  Building,
-  Plus,
-  Loader2,
-  AlertCircle,
-  Heart,
-  MessageCircle,
-  ThumbsUp,
-  Smile,
-  Frown,
-  Edit,
-  Trash,
-  X,
-  Send,
-} from "lucide-react";
-import {
-  commentNewsPost,
-  deleteNewsPost,
-  likeNewsPost,
-  reactNewsPost,
-  createNewsPost,
-} from "@/redux/slice/newsSlice";
+  DialogDescription,
+} from '@/components/ui/dialog';
 
-// Create News Dialog Component
-function CreateNewsDialog({ departments }) {
+const News = () => {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      allowLikes: true,
-      allowComments: true,
-      allowReactions: true,
-    },
-  });
-
-  const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    try {
-      const result = await dispatch(createNewsPost(data));
-      if (createNewsPost.fulfilled.match(result)) {
-        toast.success("News post created successfully");
-        reset();
-        setOpen(false);
-        dispatch(fetchNewsPosts({}));
-      } else {
-        toast.error(result.payload || "Failed to create news post");
-      }
-    } catch (error) {
-      toast.error("An error occurred");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all duration-300">
-          <Plus className="mr-2 h-4 w-4" />
-          Create News Post
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center text-2xl">
-            <FileText className="mr-2 h-6 w-6 text-emerald-600" />
-            Create News Post
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              {...register("title", { required: "Title is required" })}
-              placeholder="Enter news post title"
-              className="mt-2"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="content">Content *</Label>
-            <Textarea
-              {...register("content", { required: "Content is required" })}
-              rows={6}
-              placeholder="Write your news content here..."
-              className="mt-2"
-            />
-            {errors.content && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.content.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="department">Department *</Label>
-            <Controller
-              name="department"
-              control={control}
-              rules={{ required: "Department is required" }}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept._id} value={dept._id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.department && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.department.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <Controller
-                name="allowLikes"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="allowLikes"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="allowLikes" className="text-sm">
-                Allow Likes
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Controller
-                name="allowComments"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="allowComments"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="allowComments" className="text-sm">
-                Allow Comments
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Controller
-                name="allowReactions"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="allowReactions"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="allowReactions" className="text-sm">
-                Allow Reactions
-              </Label>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Post
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// News Post Detail Dialog Component
-function NewsPostDetailDialog({ post, open, onOpenChange }) {
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const { register, handleSubmit, reset } = useForm();
-  const [showComments, setShowComments] = useState(false);
-
-  if (!post) return null;
-
-  const isAdmin = user?.role === "admin";
-  const isPoster = post.postedBy._id === user?._id;
-  const canEditOrDelete = isAdmin || isPoster;
-  const hasLiked = post.likes.some((id) => id.toString() === user?._id);
-  const userReaction = post.reactions.find((r) => r.user._id === user?._id);
-
-  const handleLike = async () => {
-    const res = await dispatch(likeNewsPost(post._id));
-    if (likeNewsPost.rejected.match(res)) toast.error(res.payload);
-  };
-
-  const handleReaction = async (type) => {
-    const res = await dispatch(reactNewsPost({ id: post._id, type }));
-    if (reactNewsPost.rejected.match(res)) toast.error(res.payload);
-  };
-
-  const handleComment = async (data) => {
-    const res = await dispatch(
-      commentNewsPost({ id: post._id, content: data.content })
-    );
-    if (commentNewsPost.fulfilled.match(res)) {
-      reset();
-      setShowComments(true);
-    } else {
-      toast.error(res.payload);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm("Delete this news post?")) return;
-    const res = await dispatch(deleteNewsPost(post._id));
-    if (deleteNewsPost.fulfilled.match(res)) {
-      toast.success("News post deleted successfully");
-      onOpenChange(false);
-    } else {
-      toast.error(res.payload);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl">{post.title}</DialogTitle>
-            <div className="flex items-center space-x-2">
-              {canEditOrDelete && (
-                <>
-                  <Button variant="ghost" size="sm">
-                    <Edit size={20} />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete}>
-                    <Trash size={20} className="text-red-500" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Posted by {post.postedBy.firstName} {post.postedBy.lastName} in{" "}
-            {post.department.name} on{" "}
-            {new Date(post.createdAt).toLocaleDateString()}
-          </div>
-
-          {post.images && post.images.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {post.images.map((img) => (
-                <img
-                  key={img.publicId}
-                  src={img.url}
-                  alt={`News image for ${post.title}`}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              ))}
-            </div>
-          )}
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {post.content}
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-6 pt-4 border-t dark:border-gray-700">
-            {post.allowLikes && (
-              <Button
-                variant="ghost"
-                onClick={handleLike}
-                className={hasLiked ? "text-red-600" : "text-gray-600"}
-              >
-                <Heart
-                  size={20}
-                  fill={hasLiked ? "currentColor" : "none"}
-                  className="mr-2"
-                />
-                {post.likes.length}
-              </Button>
-            )}
-
-            {post.allowComments && (
-              <Button
-                variant="ghost"
-                onClick={() => setShowComments(!showComments)}
-                className="text-gray-600"
-              >
-                <MessageCircle size={20} className="mr-2" />
-                {post.comments.length}
-              </Button>
-            )}
-
-            {post.allowReactions && (
-              <div className="flex items-center space-x-2">
-                {[
-                  { type: "smile", icon: <Smile size={20} /> },
-                  { type: "heart", icon: <Heart size={20} /> },
-                  { type: "thumbsUp", icon: <ThumbsUp size={20} /> },
-                  { type: "wow", icon: <span>😮</span> },
-                  { type: "sad", icon: <Frown size={20} /> },
-                ].map(({ type, icon }) => (
-                  <Button
-                    key={type}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReaction(type)}
-                    className={
-                      userReaction?.type === type
-                        ? "text-blue-600"
-                        : "text-gray-600"
-                    }
-                  >
-                    {icon}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {showComments && post.allowComments && (
-            <div className="space-y-4 pt-4 border-t dark:border-gray-700">
-              <form
-                onSubmit={handleSubmit(handleComment)}
-                className="flex space-x-3"
-              >
-                <Input
-                  {...register("content", { required: "Comment is required" })}
-                  placeholder="Add a comment..."
-                  className="flex-1"
-                />
-                <Button type="submit">
-                  <Send size={16} />
-                </Button>
-              </form>
-
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {post.comments.map((c) => (
-                  <div
-                    key={c._id}
-                    className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"
-                  >
-                    <p className="text-gray-700 dark:text-gray-300">
-                      <span className="font-semibold">
-                        {c.user.firstName} {c.user.lastName}
-                      </span>
-                      <span className="ml-2">{c.content}</span>
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {new Date(c.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// Updated NewsPostCard Component
-function NewsPostCard({ post }) {
-  const [detailOpen, setDetailOpen] = useState(false);
-
-  return (
-    <>
-      <Card
-        className="cursor-pointer hover:shadow-lg transition-shadow border-emerald-200 dark:border-emerald-800"
-        onClick={() => setDetailOpen(true)}
-      >
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
-            <Badge variant="outline" className="ml-2 flex-shrink-0">
-              {post.department.name}
-            </Badge>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {post.images && post.images.length > 0 && (
-            <div className="relative">
-              <img
-                src={post.images[0].url}
-                alt={`News image for ${post.title}`}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-              {post.images.length > 1 && (
-                <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm">
-                  +{post.images.length - 1} more
-                </div>
-              )}
-            </div>
-          )}
-
-          <p className="text-gray-600 dark:text-gray-300 line-clamp-1">
-            {post.content}
-          </p>
-
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <div>
-              By {post.postedBy.firstName} {post.postedBy.lastName}
-            </div>
-            <div>{new Date(post.createdAt).toLocaleDateString()}</div>
-          </div>
-
-          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-            {post.allowLikes && (
-              <div className="flex items-center space-x-1">
-                <Heart size={16} />
-                <span>{post.likes.length}</span>
-              </div>
-            )}
-            {post.allowComments && (
-              <div className="flex items-center space-x-1">
-                <MessageCircle size={16} />
-                <span>{post.comments.length}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <NewsPostDetailDialog
-        post={post}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
-    </>
-  );
-}
-
-// Main News Component
-function News() {
-  const dispatch = useDispatch();
-  const {
-    newsPosts,
-    isLoading: newsLoading,
-    error,
-  } = useSelector(
-    (state) => state.news || { newsPosts: [], isLoading: false, error: null }
-  );
-  const { departments, isLoading: departmentsLoading } = useSelector(
-    (state) => state.departments || { departments: [], isLoading: false }
-  );
-  const { user } = useSelector((state) => state.auth);
-
-  const { register, handleSubmit, control, watch, setValue } = useForm({
-    defaultValues: {
-      department: "all",
-    },
-  });
-
-  const department = watch("department");
+  const { newsPosts, isLoading, error } = useSelector((state) => state.news || { newsPosts: [], isLoading: false, error: null });
+  const { departments } = useSelector((state) => state.departments || { departments: [], isLoading: false });
+  
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearError());
-    }
-  }, [error, dispatch]);
-
-  useEffect(() => {
+    dispatch(fetchNewsPosts({}));
     dispatch(getAllDepartments());
   }, [dispatch]);
 
   useEffect(() => {
-    if (department === "all") {
-      dispatch(fetchNewsPosts({}));
-    } else if (department) {
-      dispatch(fetchNewsPosts({ department }));
+    if (error) {
+      toast.error(error);
     }
-  }, [department, dispatch]);
+  }, [error]);
 
-  if (departmentsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-gray-300">
-            Loading departments...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Memoized filtered news posts for better performance
+  const filteredNewsPosts = useMemo(() => {
+    return newsPosts.filter(post => {
+      // Apply department filter
+      if (selectedDepartment !== 'all' && post.department?._id !== selectedDepartment) {
+        return false;
+      }
+      
+      // Apply my-department tab filter
+      if (activeTab === 'my-department' && user?.role === 'student') {
+        const isInMyDepartment = user.department?.some(dept => dept._id === post.department?._id);
+        if (!isInMyDepartment) return false;
+      }
+      
+      // Apply search filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch = 
+          post.title?.toLowerCase().includes(searchLower) ||
+          post.content?.toLowerCase().includes(searchLower) ||
+          post.department?.name.toLowerCase().includes(searchLower) ||
+          `${post.postedBy?.firstName} ${post.postedBy?.lastName}`.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+      
+      return true;
+    });
+  }, [newsPosts, selectedDepartment, activeTab, user, searchQuery]);
+
+  const availableDepartments = useMemo(() => {
+    if (user?.role === 'student' && user.department) {
+      return departments.filter(dept => 
+        user.department.some(userDept => userDept._id === dept._id)
+      );
+    }
+    return departments;
+  }, [departments, user]);
+
+  const handleLike = async (postId) => {
+    if (!user || user.role !== 'student') {
+      toast.error('Please log in to like posts as student');
+      return;
+    }
+    await dispatch(likeNewsPost(postId));
+  };
+
+  const handleReaction = async (postId, type) => {
+    if (!user || user.role !== 'student') {
+      toast.error('Please log in to react to posts as student');
+      return;
+    }
+    await dispatch(reactNewsPost({ id: postId, type }));
+  };
+
+  const handleComment = async (postId) => {
+    if (!user || user.role !== 'student') {
+      toast.error('Please log in to comment as student');
+      return;
+    }
+    
+    const content = commentInputs[postId];
+    if (!content || !content.trim()) {
+      toast.error('Comment cannot be empty');
+      return;
+    }
+    
+    await dispatch(commentNewsPost({ id: postId, content }));
+    
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+    setShowComments(prev => ({ ...prev, [postId]: true }));
+  };
+
+  const toggleComments = (postId) => {
+    setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
+  // Open dialog with full post content
+  const openPostDialog = (post) => {
+    setSelectedPost(post);
+    // Show comments by default when opening the dialog
+    setShowComments(prev => ({ ...prev, [post._id]: true }));
+  };
+
+  // Close dialog
+  const closePostDialog = () => {
+    setSelectedPost(null);
+  };
+
+  const getReactionIcon = (type) => {
+    switch (type) {
+      case 'smile': return <Smile className="h-4 w-4" />;
+      case 'heart': return <Heart className="h-4 w-4" />;
+      case 'thumbsUp': return <span className="text-lg">👍</span>;
+      case 'wow': return <span className="text-lg">😮</span>;
+      case 'sad': return <span className="text-lg">😢</span>;
+      default: return <Smile className="h-4 w-4" />;
+    }
+  };
+
+  const getReactionCounts = (reactions) => {
+    const counts = {};
+    reactions?.forEach(reaction => {
+      counts[reaction.type] = (counts[reaction.type] || 0) + 1;
+    });
+    return counts;
+  };
+
+  const getUserReaction = (reactions) => {
+    return reactions?.find(r => r.user._id === user?._id)?.type;
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -574,210 +181,460 @@ function News() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg mb-6">
-            <FileText className="w-8 h-8 text-white" />
+            <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
             University News
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Stay updated with the latest news and announcements from our
-            university community
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Stay updated with the latest news and announcements from your university
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Total Posts</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {newsPosts.length}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Published articles
-              </p>
-            </CardContent>
-          </Card>
+        {/* Back to Dashboard */}
+        <Button
+          onClick={() => navigate('/student/dashboard')}
+          className="mb-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Button>
 
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Departments</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <Building className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {departments.length}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Academic departments
-              </p>
-            </CardContent>
-          </Card>
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50/50 dark:bg-red-900/20 dark:border-red-800">
+            <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
+          </Alert>
+        )}
 
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Active Now</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {
-                  newsPosts.filter((post) => {
-                    const postDate = new Date(post.createdAt);
-                    const now = new Date();
-                    const diffTime = Math.abs(now - postDate);
-                    const diffDays = Math.ceil(
-                      diffTime / (1000 * 60 * 60 * 24)
-                    );
-                    return diffDays <= 7;
-                  }).length
-                }
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                This week
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-8">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <CardTitle className="text-xl flex items-center">
-                  <FileText className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  Latest News
-                </CardTitle>
-                <CardDescription>
-                  Browse news and announcements from university departments
-                </CardDescription>
-              </div>
-              {user?.role === "admin" && (
-                <div className="mt-4 md:mt-0">
-                  <CreateNewsDialog departments={departments} />
-                </div>
+        {/* Filters */}
+      {/* Filters */}
+      <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg mb-6">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search news by title, content, department or author..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700 rounded-full"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               )}
             </div>
-          </CardHeader>
-          <CardContent>
-            {/* Error Alert */}
-            {error && (
-              <Alert
-                variant="destructive"
-                className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800"
-              >
-                <AlertDescription className="text-red-800 dark:text-red-200">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
 
             {/* Department Filter */}
-            <div className="mb-6">
-              <Label
-                htmlFor="department-filter"
-                className="flex items-center mb-4"
+            <div className="flex-1">
+              <Select 
+                value={selectedDepartment} 
+                onValueChange={setSelectedDepartment}
+                disabled={activeTab === 'my-department'}
               >
-                <Building className="mr-2 h-4 w-4 text-emerald-500" />
-                Filter by Department
-              </Label>
-              <Controller
-                name="department"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                    }}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="w-full md:w-1/3 border-emerald-200 dark:border-emerald-800 focus:border-emerald-500">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Departments</SelectItem>
-                      {departments.map((dept) => (
-                        <SelectItem key={dept._id} value={dept._id}>
-                          {dept.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+                <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700">
+                  <SelectValue placeholder={
+                    activeTab === 'my-department' ? 'My Department' : 'Filter by department'
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {availableDepartments.map((dept) => (
+                    <SelectItem key={dept._id} value={dept._id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Content */}
-            {newsLoading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mb-4" />
-                <p className="text-gray-700 dark:text-gray-300">
-                  Loading news posts...
-                </p>
+            {/* View Tabs */}
+            <div className="flex space-x-2">
+              <Button
+                variant={activeTab === 'all' ? 'default' : 'outline'}
+                onClick={() => {
+                  setActiveTab('all');
+                  // Reset department filter when switching to all
+                  setSelectedDepartment('all');
+                }}
+                className={activeTab === 'all' ? 'bg-emerald-600 text-white' : ''}
+              >
+                All News
+              </Button>
+              <Button
+                variant={activeTab === 'my-department' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('my-department')}
+                className={activeTab === 'my-department' ? 'bg-emerald-600 text-white' : ''}
+                disabled={!user || user.role !== 'student'}
+              >
+                My Department
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+
+        {/* News Posts */}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+          </div>
+        ) : filteredNewsPosts.length === 0 ? (
+          <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="w-16 h-16 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mb-4">
+                <BookOpen className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
-            ) : newsPosts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mb-4">
-                  <AlertCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No news found</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+                {searchQuery || selectedDepartment !== 'all' || activeTab !== 'all'
+                  ? 'No news matches your search criteria. Try adjusting your filters.'
+                  : 'There are no news posts available at the moment.'}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="text-gray-600 dark:text-gray-400">
+                Showing {filteredNewsPosts.length} news post{filteredNewsPosts.length !== 1 ? 's' : ''}
+              </p>
+              {selectedDepartment !== 'all' && (
+                <Badge variant="outline" className="border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300">
+                  {departments.find(d => d._id === selectedDepartment)?.name || 'Selected Department'}
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredNewsPosts.map((post) => (
+                <Card 
+                  key={post._id} 
+                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                  onClick={() => openPostDialog(post)}
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg line-clamp-2 mb-2">{post.title}</CardTitle>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center">
+                            <Building className="h-4 w-4 mr-1" />
+                            <span className='truncate'>{post.department?.name || 'University'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            <span>{formatDate(post.createdAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="ml-2 flex-shrink-0 border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300 truncate">
+                        {post.department?.name || 'General'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Image */}
+                    {post.images && post.images.length > 0 && (
+                      <div className="relative">
+                        <img
+                          src={post.images[0].url}
+                          alt={post.title}
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                        {post.images.length > 1 && (
+                          <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                            +{post.images.length - 1} more
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Content Preview */}
+                    <p className="text-gray-600 dark:text-gray-300 line-clamp-1">
+                      {post.content}
+                    </p>
+
+                    {/* Engagement Stats */}
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-gray-700">
+                      <div className="flex items-center space-x-4">
+                        {/* Likes */}
+                        {post.allowLikes && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(post._id);
+                            }}
+                            className={`flex items-center space-x-1 ${
+                              post.likes?.includes(user?._id) ? 'text-red-600' : 'text-gray-600'
+                            }`}
+                          >
+                            <Heart 
+                              size={16} 
+                              fill={post.likes?.includes(user?._id) ? "currentColor" : "none"} 
+                              className="h-4 w-4"
+                            />
+                            <span>{post.likes?.length || 0}</span>
+                          </Button>
+                        )}
+
+                        {/* Comments */}
+                        {post.allowComments && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleComments(post._id);
+                            }}
+                            className="flex items-center space-x-1 text-gray-600"
+                          >
+                            <MessageCircle size={16} />
+                            <span>{post.comments?.length || 0}</span>
+                          </Button>
+                        )}
+
+                        {/* Reactions */}
+                        {post.allowReactions && (
+                          <div className="flex items-center space-x-1">
+                            {Object.entries(getReactionCounts(post.reactions)).map(([type, count]) => (
+                              <Button
+                                key={type}
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReaction(post._id, type);
+                                }}
+                                className={`p-1 h-8 w-8 rounded-full ${
+                                  getUserReaction(post.reactions) === type 
+                                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' 
+                                    : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                }`}
+                              >
+                                {getReactionIcon(type)}
+                                <span className="text-xs">{count}</span>
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Author */}
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {post.postedBy?.firstName} {post.postedBy?.lastName}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Posted {formatDate(post.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* News Post Dialog */}
+        <Dialog open={!!selectedPost} onOpenChange={(open) => !open && closePostDialog()}>
+          {selectedPost && (
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <DialogTitle className="text-2xl">{selectedPost.title}</DialogTitle>
+                    <DialogDescription className="flex items-center space-x-4 mt-2">
+                      <span className="flex items-center">
+                        <Building className="h-4 w-4 mr-1" />
+                        {selectedPost.department?.name || 'University'}
+                      </span>
+                      <span className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        {formatDate(selectedPost.createdAt)}
+                      </span>
+                    </DialogDescription>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={closePostDialog}
+                    className="absolute right-4 top-4"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-                <p className="text-lg text-gray-700 dark:text-gray-300 mb-2">
-                  No news posts available
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                  {department === "all"
-                    ? "There are no news posts yet"
-                    : "There are no news posts for this department yet"}
-                </p>
-                {user?.role === "admin" && (
-                  <div className="mt-4">
-                    <CreateNewsDialog departments={departments} />
+              </DialogHeader>
+
+              <div className="space-y-6 py-4">
+                {/* Images */}
+                {selectedPost.images && selectedPost.images.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedPost.images.map((image, index) => (
+                      <div key={index} className="rounded-lg overflow-hidden">
+                        <img
+                          src={image.url}
+                          alt={`${selectedPost.title} - ${index + 1}`}
+                          className="w-full h-auto max-h-96 object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Full Content */}
+                <div className="prose dark:prose-invert max-w-none">
+                  {selectedPost.content.split('\n').map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+
+                {/* Engagement Stats */}
+                <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
+                  <div className="flex items-center space-x-4">
+                    {/* Likes */}
+                    {selectedPost.allowLikes && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLike(selectedPost._id)}
+                        className={`flex items-center space-x-1 ${
+                          selectedPost.likes?.includes(user?._id) ? 'text-red-600' : 'text-gray-600'
+                        }`}
+                      >
+                        <Heart 
+                          size={16} 
+                          fill={selectedPost.likes?.includes(user?._id) ? "currentColor" : "none"} 
+                          className="h-4 w-4"
+                        />
+                        <span>{selectedPost.likes?.length || 0}</span>
+                      </Button>
+                    )}
+
+                    {/* Comments */}
+                    {selectedPost.allowComments && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleComments(selectedPost._id)}
+                        className="flex items-center space-x-1 text-gray-600"
+                      >
+                        <MessageCircle size={16} />
+                        <span>{selectedPost.comments?.length || 0}</span>
+                      </Button>
+                    )}
+
+                    {/* Reactions */}
+                    {selectedPost.allowReactions && (
+                      <div className="flex items-center space-x-1">
+                        {Object.entries(getReactionCounts(selectedPost.reactions)).map(([type, count]) => (
+                          <Button
+                            key={type}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReaction(selectedPost._id, type)}
+                            className={`p-1 h-8 w-8 rounded-full ${
+                              getUserReaction(selectedPost.reactions) === type 
+                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' 
+                                : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            {getReactionIcon(type)}
+                            <span className="text-xs">{count}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Author */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {selectedPost.postedBy?.firstName} {selectedPost.postedBy?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Posted {formatDate(selectedPost.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Comments Section */}
+                {showComments[selectedPost._id] && selectedPost.allowComments && (
+                  <div className="space-y-3 pt-3 border-t dark:border-gray-700">
+                    {/* Comment Input */}
+                    <div className="flex space-x-2">
+                      <Input
+                        value={commentInputs[selectedPost._id] || ''}
+                        onChange={(e) => setCommentInputs(prev => ({ ...prev, [selectedPost._id]: e.target.value }))}
+                        placeholder="Add a comment..."
+                        className="flex-1 bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700"
+                      />
+                      <Button
+                        onClick={() => handleComment(selectedPost._id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      >
+                        Post
+                      </Button>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {selectedPost.comments?.length > 0 ? (
+                        selectedPost.comments.map((comment) => (
+                          <div key={comment._id} className="bg-gray-50/50 dark:bg-gray-800/50 p-3 rounded-lg">
+                            <div className="flex justify-between">
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                  {comment.user?.firstName} {comment.user?.lastName}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {formatDate(comment.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="mt-2 text-gray-700 dark:text-gray-300">
+                              {comment.content}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center text-gray-500 dark:text-gray-400 py-2">
+                          No comments yet. Be the first to comment!
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Showing {newsPosts.length} news post
-                    {newsPosts.length !== 1 ? "s" : ""}
-                  </p>
-                  {department && department !== "all" && (
-                    <Badge
-                      variant="outline"
-                      className="border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300"
-                    >
-                      {departments.find((d) => d._id === department)?.name}
-                    </Badge>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {newsPosts.map((post) => (
-                    <NewsPostCard key={post._id} post={post} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </DialogContent>
+          )}
+        </Dialog>
       </div>
     </div>
   );
-}
+};
 
 export default News;

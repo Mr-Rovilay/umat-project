@@ -17,12 +17,16 @@ const programSchema = new mongoose.Schema(
       type: String,
     },
     degree: {
-        type: String,
-        enum: ['Bachelor', 'Master', 'PhD'],
-        required: true,
+      type: String,
+      enum: ['Bachelor', 'Master', 'PhD', 'BSc', 'MSc'],
+      required: true,
     },
+    courses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course',
+    }],
   },
-  { timestamps: true }, 
+  { timestamps: true },
 );
 
 const Program = mongoose.model('Program', programSchema);

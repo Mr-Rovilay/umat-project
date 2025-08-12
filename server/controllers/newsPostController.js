@@ -1,9 +1,10 @@
+// controllers/newsPostController.js
 import NewsPost from '../models/NewsPost.js';
+import Department from '../models/Department.js';
 import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
 import { unlink } from 'fs/promises';
 
-// Configure Cloudinary (replace with your credentials)
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -13,65 +14,78 @@ cloudinary.v2.config({
 // Admin: Create a news post
 export const createNewsPost = async (req, res) => {
   try {
+    
+    // Extract data from req.body
     const { title, content, department, allowLikes, allowComments, allowReactions } = req.body;
     const files = req.files;
-
-    // Validate required fields
+    
     if (!title || !content || !department) {
       return res.status(400).json({ message: 'Title, content, and department are required' });
     }
+    
+    // Check if department ID is valid
     if (!mongoose.isValidObjectId(department)) {
       return res.status(400).json({ message: 'Invalid department ID' });
     }
-
-    // Upload images to Cloudinary if provided
+    
+    // Check if user is admin for the specified department
+    const dept = await Department.findById(department);
+    if (!dept) {
+      return res.status(404).json({ message: 'Department not found' });
+    }
+    
+    // Check if user is authorized
+    if (req.user.role !== 'admin' || !dept.admins.includes(req.user._id)) {
+      return res.status(403).json({ message: 'Unauthorized to create posts for this department' });
+    }
+    
     let images = [];
     if (files && files.length > 0) {
-      const uploadPromises = files.map(file =>
-        cloudinary.v2.uploader.upload(file.path, { folder: 'news_posts' })
-      );
+      const uploadPromises = files.map(file => cloudinary.v2.uploader.upload(file.path, { folder: 'news_posts' }));
       const results = await Promise.all(uploadPromises);
-      images = results.map(result => ({
-        url: result.secure_url,
-        publicId: result.public_id,
-      }));
-
-      // Clean up local files
+      images = results.map(result => ({ url: result.secure_url, publicId: result.public_id }));
       await Promise.all(files.map(file => unlink(file.path)));
     }
-
-    // Create post
+    
+    // Convert string boolean values to actual booleans
+    const allowLikesBool = allowLikes === 'true' ? true : allowLikes === 'false' ? false : true;
+    const allowCommentsBool = allowComments === 'true' ? true : allowComments === 'false' ? false : true;
+    const allowReactionsBool = allowReactions === 'true' ? true : allowReactions === 'false' ? false : true;
+    
     const post = await NewsPost.create({
       title,
       content,
       department,
       postedBy: req.user._id,
-      allowLikes: allowLikes !== undefined ? allowLikes : true,
-      allowComments: allowComments !== undefined ? allowComments : true,
-      allowReactions: allowReactions !== undefined ? allowReactions : true,
+      allowLikes: allowLikesBool,
+      allowComments: allowCommentsBool,
+      allowReactions: allowReactionsBool,
       images,
     });
-
+    
     const populatedPost = await NewsPost.findById(post._id)
       .populate('department', 'name')
       .populate('postedBy', 'firstName lastName');
-
+      
     res.status(201).json({ message: 'News post created successfully', post: populatedPost });
   } catch (error) {
     console.error('Create News Post Error:', error);
     res.status(500).json({ message: 'Server error while creating news post' });
   }
 };
-
-// Get news posts by department
+// Get news posts by department or all posts
 export const getNewsPosts = async (req, res) => {
   try {
     const { department } = req.query;
-    if (!department || !mongoose.isValidObjectId(department)) {
-      return res.status(400).json({ message: 'Valid department ID is required' });
+    let query = {};
+    if (department) {
+      if (!mongoose.isValidObjectId(department)) {
+        return res.status(400).json({ message: 'Invalid department ID' });
+      }
+      query.department = department;
     }
 
-    const posts = await NewsPost.find({ department })
+    const posts = await NewsPost.find(query)
       .populate('department', 'name')
       .populate('postedBy', 'firstName lastName')
       .populate('comments.user', 'firstName lastName')
@@ -89,23 +103,15 @@ export const getNewsPosts = async (req, res) => {
 export const likeNewsPost = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.isValidObjectId(id)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid post ID' });
 
     const post = await NewsPost.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: 'News post not found' });
-    }
-    if (!post.allowLikes) {
-      return res.status(403).json({ message: 'Likes are not allowed for this post' });
-    }
+    if (!post) return res.status(404).json({ message: 'News post not found' });
+    if (!post.allowLikes) return res.status(403).json({ message: 'Likes are not allowed for this post' });
 
-    if (post.likes.includes(req.user._id)) {
-      post.likes = post.likes.filter(userId => userId.toString() !== req.user._id.toString());
-    } else {
-      post.likes.push(req.user._id);
-    }
+    post.likes = post.likes.includes(req.user._id)
+      ? post.likes.filter(userId => userId.toString() !== req.user._id.toString())
+      : [...post.likes, req.user._id];
 
     await post.save();
     const populatedPost = await NewsPost.findById(id)
@@ -126,20 +132,12 @@ export const commentNewsPost = async (req, res) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
-    if (!mongoose.isValidObjectId(id)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
-    if (!content) {
-      return res.status(400).json({ message: 'Comment content is required' });
-    }
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid post ID' });
+    if (!content) return res.status(400).json({ message: 'Comment content is required' });
 
     const post = await NewsPost.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: 'News post not found' });
-    }
-    if (!post.allowComments) {
-      return res.status(403).json({ message: 'Comments are not allowed for this post' });
-    }
+    if (!post) return res.status(404).json({ message: 'News post not found' });
+    if (!post.allowComments) return res.status(403).json({ message: 'Comments are not allowed for this post' });
 
     post.comments.push({ user: req.user._id, content });
     await post.save();
@@ -162,22 +160,15 @@ export const reactNewsPost = async (req, res) => {
   try {
     const { id } = req.params;
     const { type } = req.body;
-    if (!mongoose.isValidObjectId(id)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid post ID' });
     if (!type || !['smile', 'heart', 'thumbsUp', 'wow', 'sad'].includes(type)) {
       return res.status(400).json({ message: 'Valid reaction type is required' });
     }
 
     const post = await NewsPost.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: 'News post not found' });
-    }
-    if (!post.allowReactions) {
-      return res.status(403).json({ message: 'Reactions are not allowed for this post' });
-    }
+    if (!post) return res.status(404).json({ message: 'News post not found' });
+    if (!post.allowReactions) return res.status(403).json({ message: 'Reactions are not allowed for this post' });
 
-    // Remove existing reaction by the user, if any
     post.reactions = post.reactions.filter(r => r.user.toString() !== req.user._id.toString());
     post.reactions.push({ user: req.user._id, type });
     await post.save();
@@ -202,62 +193,40 @@ export const editNewsPost = async (req, res) => {
     const { title, content, department, allowLikes, allowComments, allowReactions, removeImages } = req.body;
     const files = req.files;
 
-    // Validate post ID
-    if (!mongoose.isValidObjectId(id)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
-
-    // Validate department if provided
-    if (department && !mongoose.isValidObjectId(department)) {
-      return res.status(400).json({ message: 'Invalid department ID' });
-    }
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid post ID' });
+    if (department && !mongoose.isValidObjectId(department)) return res.status(400).json({ message: 'Invalid department ID' });
 
     const post = await NewsPost.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: 'News post not found' });
-    }
-
-    // Check if user is the poster or an admin
-    if (post.postedBy.toString() !== req.user._id.toString() || req.user.role !== 'admin') {
+    if (!post) return res.status(404).json({ message: 'News post not found' });
+    if (post.postedBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Unauthorized to edit this post' });
     }
-
-    // Handle image updates
-    let images = post.images;
-    if (removeImages && Array.isArray(removeImages)) {
-      // Delete specified images from Cloudinary
-      await Promise.all(
-        removeImages.map(publicId =>
-          cloudinary.v2.uploader.destroy(publicId)
-        )
-      );
-      images = images.filter(img => !removeImages.includes(img.publicId));
+    if (department) {
+      const dept = await Department.findById(department);
+      if (!dept) return res.status(404).json({ message: 'Department not found' });
+      if (req.user.role !== 'admin' || !dept.admins.includes(req.user._id)) {
+        return res.status(403).json({ message: 'Unauthorized to edit posts for this department' });
+      }
     }
 
-    if (files && files.length > 0) {
-      const uploadPromises = files.map(file =>
-        cloudinary.v2.uploader.upload(file.path, { folder: 'news_posts' })
-      );
+    let images = post.images;
+    if (removeImages?.length > 0) {
+      await Promise.all(removeImages.map(publicId => cloudinary.v2.uploader.destroy(publicId)));
+      images = images.filter(img => !removeImages.includes(img.publicId));
+    }
+    if (files?.length > 0) {
+      const uploadPromises = files.map(file => cloudinary.v2.uploader.upload(file.path, { folder: 'news_posts' }));
       const results = await Promise.all(uploadPromises);
-      images = [
-        ...images,
-        ...results.map(result => ({
-          url: result.secure_url,
-          publicId: result.public_id,
-        })),
-      ];
-
-      // Clean up local files
+      images = [...images, ...results.map(result => ({ url: result.secure_url, publicId: result.public_id }))];
       await Promise.all(files.map(file => unlink(file.path)));
     }
 
-    // Update post fields
-    post.title = title || post.title;
-    post.content = content || post.content;
-    post.department = department || post.department;
-    post.allowLikes = allowLikes !== undefined ? allowLikes : post.allowLikes;
-    post.allowComments = allowComments !== undefined ? allowComments : post.allowComments;
-    post.allowReactions = allowReactions !== undefined ? allowReactions : post.allowReactions;
+    post.title = title ?? post.title;
+    post.content = content ?? post.content;
+    post.department = department ?? post.department;
+    post.allowLikes = allowLikes === 'true' ? true : allowLikes === 'false' ? false : post.allowLikes;
+    post.allowComments = allowComments === 'true' ? true : allowComments === 'false' ? false : post.allowComments;
+    post.allowReactions = allowReactions === 'true' ? true : allowReactions === 'false' ? false : post.allowReactions;
     post.images = images;
 
     await post.save();
@@ -280,29 +249,18 @@ export const deleteNewsPost = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate post ID
-    if (!mongoose.isValidObjectId(id)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid post ID' });
 
     const post = await NewsPost.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: 'News post not found' });
-    }
-
-    // Check if user is the poster or an admin
-    if (post.postedBy.toString() !== req.user._id.toString() || req.user.role !== 'admin') {
+    if (!post) return res.status(404).json({ message: 'News post not found' });
+    if (post.postedBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Unauthorized to delete this post' });
     }
 
-    // Delete images from Cloudinary
     if (post.images.length > 0) {
-      await Promise.all(
-        post.images.map(img => cloudinary.v2.uploader.destroy(img.publicId))
-      );
+      await Promise.all(post.images.map(img => cloudinary.v2.uploader.destroy(img.publicId)));
     }
 
-    // Delete post
     await NewsPost.findByIdAndDelete(id);
 
     res.status(200).json({ message: 'News post deleted successfully' });

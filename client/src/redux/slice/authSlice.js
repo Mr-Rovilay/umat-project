@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/utils/server';
 
-// Async thunk for user registration
+// Async thunk for user registration (student only)
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
@@ -40,7 +40,7 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-// Async thunk for getting user
+// Async thunk for getting user (includes owingStatus)
 export const getUser = createAsyncThunk(
   'auth/getUser',
   async (_, { rejectWithValue }) => {
@@ -49,6 +49,18 @@ export const getUser = createAsyncThunk(
       return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to get user');
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  'auth/updateUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/api/auth/user', data);
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update user');
     }
   }
 );
@@ -167,6 +179,18 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.user = null;
         state.isAuthenticated = false;
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       })
       // Change password cases
       .addCase(changePassword.pending, (state) => {

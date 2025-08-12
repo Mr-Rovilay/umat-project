@@ -22,18 +22,17 @@ import ManageCourses from "./components/pages/ManageCourses";
 import News from "./components/pages/News";
 import CreateNewsPost from "./components/pages/CreateNewsPost";
 import Profile from "./components/pages/Profile";
+import PaymentConfirmation from "./components/pages/PaymentConfirmation";
+import PaymentHistory from "./components/pages/PaymentHistory";
+import PaymentCallback from "./components/PaymentCallback ";
 
 function App() {
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
         await Store.dispatch(getUser());
       } catch (error) {
         console.error("Failed to load user", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -50,13 +49,32 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/programs" element={<ProgramsPage />} />
-           <Route path="/profile" element={  <ProtectedRoute role="student">
-                    <Profile />
-                  </ProtectedRoute>} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute role="student">
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/departments" element={<DepartmentsPage />} />
-                        <Route path="/news" element={<News />} />
-              <Route path="/news/create" element={<ProtectedRoute role="admin"><CreateNewsPost /></ProtectedRoute>} />
-              <Route path="/news/edit/:id" element={<ProtectedRoute role="admin"><CreateNewsPost /></ProtectedRoute>} />
+          <Route path="/news" element={<News />} />
+          <Route
+            path="/news/create"
+            element={
+              <ProtectedRoute role="admin">
+                <CreateNewsPost />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/news/edit/:id"
+            element={
+              <ProtectedRoute role="admin">
+                <CreateNewsPost />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -73,46 +91,70 @@ function App() {
               </ProtectedRoute>
             }
           />
-                        <Route
-                path="/courses/available"
-                element={
-                  <ProtectedRoute role="student">
-                    <AvailableCourses />
-                  </ProtectedRoute>
-                }
-              />
-                            <Route
-                path="/courses/register"
-                element={
-                  <ProtectedRoute role="student">
-                    <RegisterCourses />
-                  </ProtectedRoute>
-                }
-              />
-                            <Route
-                path="/courses/my-courses"
-                element={
-                  <ProtectedRoute role="student">
-                    <MyCourses />
-                  </ProtectedRoute>
-                }
-              />
-                            <Route
-                path="/courses/create"
-                element={
-                  <ProtectedRoute role="admin">
-                    <CreateCourse />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/courses/manage"
-                element={
-                  <ProtectedRoute role="admin">
-                    <ManageCourses />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/courses/available"
+            element={
+              <ProtectedRoute role="student">
+                <AvailableCourses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment/confirmation/:reference"
+            element={
+              <ProtectedRoute role="student">
+                <PaymentConfirmation />
+              </ProtectedRoute>
+            }
+          />
+                    <Route
+            path="/student/payments/history"
+            element={
+              <ProtectedRoute role="student">
+                <PaymentHistory />
+              </ProtectedRoute>
+            }
+          />
+                    <Route
+            path="/payment/callback"
+            element={
+              <ProtectedRoute role="student">
+                <PaymentCallback />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/register"
+            element={
+              <ProtectedRoute role="student">
+                <RegisterCourses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/my-courses"
+            element={
+              <ProtectedRoute role="student">
+                <MyCourses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/create"
+            element={
+              <ProtectedRoute role="admin">
+                <CreateCourse />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/manage"
+            element={
+              <ProtectedRoute role="admin">
+                <ManageCourses />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard/programs"
             element={

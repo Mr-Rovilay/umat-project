@@ -1,3 +1,4 @@
+// redux/slice/departmentSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/utils/server';
 
@@ -7,7 +8,7 @@ export const createDepartment = createAsyncThunk(
   async (departmentData, { rejectWithValue }) => {
     try {
       const response = await api.post('/api/departments', departmentData);
-      return response.data;
+      return response.data; // { message, department }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create department');
     }
@@ -74,13 +75,16 @@ const departmentSlice = createSlice({
     isLoading: false,
     error: null,
     successMessage: null,
+    operationStatus: null, // Added for create/update/delete tracking
   },
   reducers: {
     clearError: (state) => {
       state.error = null;
+      state.operationStatus = null;
     },
     clearSuccessMessage: (state) => {
       state.successMessage = null;
+      state.operationStatus = null;
     },
   },
   extraReducers: (builder) => {
@@ -90,15 +94,18 @@ const departmentSlice = createSlice({
         state.isLoading = true;
         state.error = null;
         state.successMessage = null;
+        state.operationStatus = 'creating';
       })
       .addCase(createDepartment.fulfilled, (state, action) => {
         state.isLoading = false;
         state.departments.push(action.payload.department);
         state.successMessage = action.payload.message;
+        state.operationStatus = 'success';
       })
       .addCase(createDepartment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.operationStatus = 'failed';
       })
       // Get all departments
       .addCase(getAllDepartments.pending, (state) => {
@@ -131,6 +138,7 @@ const departmentSlice = createSlice({
         state.isLoading = true;
         state.error = null;
         state.successMessage = null;
+        state.operationStatus = 'updating';
       })
       .addCase(updateDepartment.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -139,25 +147,30 @@ const departmentSlice = createSlice({
         );
         state.currentDepartment = action.payload;
         state.successMessage = 'Department updated successfully';
+        state.operationStatus = 'success';
       })
       .addCase(updateDepartment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.operationStatus = 'failed';
       })
       // Delete department
       .addCase(deleteDepartment.pending, (state) => {
         state.isLoading = true;
         state.error = null;
         state.successMessage = null;
+        state.operationStatus = 'deleting';
       })
       .addCase(deleteDepartment.fulfilled, (state, action) => {
         state.isLoading = false;
         state.departments = state.departments.filter((dept) => dept._id !== action.payload.id);
         state.successMessage = action.payload.message;
+        state.operationStatus = 'success';
       })
       .addCase(deleteDepartment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.operationStatus = 'failed';
       });
   },
 });

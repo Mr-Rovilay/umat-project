@@ -13,24 +13,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { clearError, createNewsPost, editNewsPost } from '@/redux/slice/newsSlice';
+import { clearError, createNewsPost, editNewsPost, fetchNewsPosts } from '@/redux/slice/newsSlice';
 import { getAllDepartments } from '@/redux/slice/departmentSlice';
 
 function CreateNewsPost() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useSelector((state) => state.auth);
   const { departments, isLoading: departmentsLoading } = useSelector((state) => state.departments || { departments: [], isLoading: false });
   const { newsPosts, isLoading: newsLoading, error } = useSelector((state) => state.news || { newsPosts: [], isLoading: false, error: null });
   const post = id ? newsPosts.find((p) => p._id === id) : null;
   
-  // FIX: Add 'control' to the destructuring
   const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
     defaultValues: post
       ? {
           title: post.title,
           content: post.content,
-          department: post.department._id,
+          department: post.department?._id || '',
           allowLikes: post.allowLikes,
           allowComments: post.allowComments,
           allowReactions: post.allowReactions,
@@ -58,7 +58,10 @@ function CreateNewsPost() {
 
   useEffect(() => {
     dispatch(getAllDepartments());
-  }, [dispatch]);
+    if (id) {
+      dispatch(fetchNewsPosts({}));
+    }
+  }, [dispatch, id]);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -79,31 +82,86 @@ function CreateNewsPost() {
   };
 
   const onSubmit = async (data) => {
-    const payload = {
-      ...data,
-      images,
-      removeImages: removeImages.length > 0 ? removeImages : undefined,
-    };
-    
-    const response = id
-      ? await dispatch(editNewsPost({ id, data: payload }))
-      : await dispatch(createNewsPost(payload));
+    try {
+      const formData = new FormData();
       
-    if (id ? editNewsPost.fulfilled.match(response) : createNewsPost.fulfilled.match(response)) {
-      toast.success(id ? 'News post updated successfully' : 'News post created successfully');
-      navigate('/news');
-      reset();
-      setImages([]);
-      setRemoveImages([]);
+      // Append all fields
+      formData.append('title', data.title);
+      formData.append('content', data.content);
+      formData.append('department', data.department);
+      formData.append('allowLikes', data.allowLikes);
+      formData.append('allowComments', data.allowComments);
+      formData.append('allowReactions', data.allowReactions);
+      
+      // Add images if any
+      if (images.length > 0) {
+        images.forEach((image) => {
+          formData.append('images', image);
+        });
+      }
+      
+      // Add images to remove if any
+      if (removeImages.length > 0) {
+        formData.append('removeImages', JSON.stringify(removeImages));
+      }
+      
+      // Pass the FormData directly to the Redux action
+      const response = id
+        ? await dispatch(editNewsPost({ id, data: formData }))
+        : await dispatch(createNewsPost(formData));
+        
+      if (id ? editNewsPost.fulfilled.match(response) : createNewsPost.fulfilled.match(response)) {
+        toast.success(id ? 'News post updated successfully' : 'News post created successfully');
+        navigate('/news');
+        reset();
+        setImages([]);
+        setRemoveImages([]);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error('An error occurred while submitting the form');
     }
   };
 
+  // Fixed department filtering logic
+  const allowedDepartments = user?.role === 'admin' 
+    ? departments.filter(dept => {
+        // If user has a department field and it's an array
+        if (user.department && Array.isArray(user.department)) {
+          return user.department.some(userDept => 
+            userDept._id === dept._id || userDept.toString() === dept._id.toString()
+          );
+        }
+        // If user doesn't have specific departments assigned, show all departments
+        return true;
+      })
+    : [];
+
+  
   if (departmentsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-gray-300">Loading departments...</p>
+          <p className="text-gray-700 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is authorized
+  if (user?.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              Access denied. Admins only.
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
+            Back to Dashboard
+          </Button>
         </div>
       </div>
     );
@@ -127,7 +185,6 @@ function CreateNewsPost() {
             }
           </p>
         </div>
-
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
@@ -136,7 +193,6 @@ function CreateNewsPost() {
             </AlertDescription>
           </Alert>
         )}
-
         {/* Form */}
         <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
           <CardHeader>
@@ -169,7 +225,6 @@ function CreateNewsPost() {
                   </p>
                 )}
               </div>
-
               {/* Content Field */}
               <div className="space-y-2">
                 <Label htmlFor="content" className="flex items-center">
@@ -189,7 +244,6 @@ function CreateNewsPost() {
                   </p>
                 )}
               </div>
-
               {/* Department Field */}
               <div className="space-y-2">
                 <Label htmlFor="department" className="flex items-center">
@@ -198,17 +252,34 @@ function CreateNewsPost() {
                 </Label>
                 <Controller
                   name="department"
-                  control={control}  // Now control is defined
+                  control={control}
                   rules={{ required: 'Department is required' }}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                      }} 
+                      value={field.value}
+                    >
                       <SelectTrigger className="border-emerald-200 dark:border-emerald-800 focus:border-emerald-500">
-                        <SelectValue placeholder="Select department" />
+                        <SelectValue placeholder={
+                          departmentsLoading ? "Loading departments..." : 
+                          allowedDepartments.length === 0 ? "No departments available" : 
+                          "Select department"
+                        } />
                       </SelectTrigger>
                       <SelectContent>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept._id} value={dept._id}>{dept.name}</SelectItem>
-                        ))}
+                        {departmentsLoading ? (
+                          <SelectItem value="loading" disabled>Loading...</SelectItem>
+                        ) : allowedDepartments.length > 0 ? (
+                          allowedDepartments.map((dept) => (
+                            <SelectItem key={dept._id} value={dept._id}>
+                              {dept.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>No departments available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   )}
@@ -220,16 +291,22 @@ function CreateNewsPost() {
                   </p>
                 )}
               </div>
-
               {/* Engagement Options */}
               <div className="space-y-3">
                 <Label className="text-base font-medium">Engagement Options</Label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex items-center space-x-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                    <Checkbox
-                      id="allowLikes"
-                      {...register('allowLikes')}
-                      className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    <Controller
+                      name="allowLikes"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          id="allowLikes"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                        />
+                      )}
                     />
                     <Label htmlFor="allowLikes" className="flex items-center cursor-pointer">
                       <Heart className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -238,10 +315,17 @@ function CreateNewsPost() {
                   </div>
                   
                   <div className="flex items-center space-x-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                    <Checkbox
-                      id="allowComments"
-                      {...register('allowComments')}
-                      className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    <Controller
+                      name="allowComments"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          id="allowComments"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                        />
+                      )}
                     />
                     <Label htmlFor="allowComments" className="flex items-center cursor-pointer">
                       <MessageCircle className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -250,10 +334,17 @@ function CreateNewsPost() {
                   </div>
                   
                   <div className="flex items-center space-x-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                    <Checkbox
-                      id="allowReactions"
-                      {...register('allowReactions')}
-                      className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    <Controller
+                      name="allowReactions"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          id="allowReactions"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                        />
+                      )}
                     />
                     <Label htmlFor="allowReactions" className="flex items-center cursor-pointer">
                       <Smile className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -262,7 +353,6 @@ function CreateNewsPost() {
                   </div>
                 </div>
               </div>
-
               {/* Image Upload */}
               <div className="space-y-3">
                 <Label className="flex items-center">
@@ -295,7 +385,6 @@ function CreateNewsPost() {
                   </Label>
                 </div>
               </div>
-
               {/* Image Previews */}
               {(existingImages.length > 0 || images.length > 0) && (
                 <div className="space-y-3">
@@ -345,12 +434,11 @@ function CreateNewsPost() {
                   </div>
                 </div>
               )}
-
               {/* Submit Button */}
               <div className="flex justify-end pt-4">
                 <Button
                   type="submit"
-                  disabled={newsLoading}
+                  disabled={newsLoading || allowedDepartments.length === 0}
                   className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
                 >
                   {newsLoading ? (

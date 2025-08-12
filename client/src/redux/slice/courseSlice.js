@@ -1,13 +1,6 @@
-import api from '@/utils/server';
+// redux/slice/courseSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-
-const initialState = {
-  availableCourses: [],
-  myCourses: [],
-  isLoading: false,
-  error: null,
-};
+import api from '@/utils/server';
 
 // Fetch available courses
 export const fetchAvailableCourses = createAsyncThunk(
@@ -27,8 +20,32 @@ export const registerCourses = createAsyncThunk(
   'courses/registerCourses',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await api.post('/api/courses/register', data);
-      return response.data.registration;
+      const formData = new FormData();
+      
+      // Append the JSON data as a string
+      formData.append('data', JSON.stringify({
+        program: data.program,
+        level: data.level,
+        semester: data.semester,
+        courseIds: data.courseIds,
+      }));
+      
+      // Append files with the correct field names
+      if (data.courseRegistrationSlip) {
+        formData.append('courseRegistrationSlip', data.courseRegistrationSlip);
+      }
+      
+      if (data.schoolFeesReceipt) {
+        formData.append('schoolFeesReceipt', data.schoolFeesReceipt);
+      }
+      
+      if (data.hallDuesReceipt) {
+        formData.append('hallDuesReceipt', data.hallDuesReceipt);
+      }
+      
+      const response = await api.post('/api/courses/register', formData)
+      
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to register courses');
     }
@@ -89,14 +106,20 @@ export const deleteCourse = createAsyncThunk(
 
 const courseSlice = createSlice({
   name: 'courses',
-  initialState,
+  initialState: {
+    availableCourses: [],
+    myCourses: [],
+    isLoading: false,
+    creationStatus: null, // Added for tracking creation
+    error: null,
+  },
   reducers: {
     clearError: (state) => {
       state.error = null;
+      state.creationStatus = null;
     },
   },
   extraReducers: (builder) => {
-    // Fetch available courses
     builder
       .addCase(fetchAvailableCourses.pending, (state) => {
         state.isLoading = true;
@@ -109,10 +132,7 @@ const courseSlice = createSlice({
       .addCase(fetchAvailableCourses.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
-
-    // Register courses
-    builder
+      })
       .addCase(registerCourses.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -124,10 +144,7 @@ const courseSlice = createSlice({
       .addCase(registerCourses.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
-
-    // Fetch my courses
-    builder
+      })
       .addCase(fetchMyCourses.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -139,16 +156,15 @@ const courseSlice = createSlice({
       .addCase(fetchMyCourses.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
-
-    // Create course
-    builder
+      })
       .addCase(createCourse.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.creationStatus = 'pending';
       })
       .addCase(createCourse.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.creationStatus = 'success';
         state.availableCourses = Array.isArray(action.payload)
           ? [...state.availableCourses, ...action.payload]
           : [...state.availableCourses, action.payload];
@@ -156,10 +172,8 @@ const courseSlice = createSlice({
       .addCase(createCourse.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
-
-    // Update course
-    builder
+        state.creationStatus = 'failed';
+      })
       .addCase(updateCourse.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -173,10 +187,7 @@ const courseSlice = createSlice({
       .addCase(updateCourse.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
-
-    // Delete course
-    builder
+      })
       .addCase(deleteCourse.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -191,11 +202,6 @@ const courseSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       });
-
-    // Handle logout
-    // builder.addCase(logoutUser.fulfilled, (state) => {
-    //   return initialState;
-    // });
   },
 });
 

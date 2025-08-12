@@ -1,3 +1,4 @@
+// models/Department.js
 import mongoose from 'mongoose';
 
 const departmentSchema = new mongoose.Schema(
@@ -8,10 +9,14 @@ const departmentSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-   program: {
+    programs: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Program',
     },
+    admins: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
   },
   { timestamps: true }
 );

@@ -198,12 +198,6 @@ const Navbar = () => {
                       </NavLink>
                     </DropdownMenuItem>
                      )}
-                    {/* <DropdownMenuItem asChild>
-                      <NavLink to="/settings" className="flex items-center w-full">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </NavLink>
-                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={handleLogout}
                       className="text-red-600 cursor-pointer"

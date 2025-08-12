@@ -12,7 +12,8 @@ import {
   Users,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from 'lucide-react';
 
 function StudentDashboard() {
@@ -130,7 +131,7 @@ function StudentDashboard() {
                     <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Register Courses</CardTitle>
+                    <CardTitle className="text-lg">Course Registration</CardTitle>
                     <CardDescription>
                     Enrolled courses and progress
                     </CardDescription>
@@ -147,96 +148,33 @@ function StudentDashboard() {
               </CardContent>
             </Card>
           </Link>
+
+            <Link to="/student/payments/history">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <CreditCard className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Payment History</CardTitle>
+                    <CardDescription>
+                   Check your payment History
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
+                  <span>View my courses</span>
+                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
-
-        {/* Upcoming Deadlines */}
-        {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-10">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center">
-              <Calendar className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              Upcoming Deadlines
-            </CardTitle>
-            <CardDescription>
-              Stay on top of your upcoming assignments and exams
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Data Structures Assignment</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Computer Science Department</p>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-red-500 mr-1" />
-                  <span className="text-sm font-medium text-red-600 dark:text-red-400">Tomorrow, 11:59 PM</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Calculus II Midterm</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Mathematics Department</p>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-amber-500 mr-1" />
-                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Jun 15, 2023</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Physics Lab Report</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Physics Department</p>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-blue-500 mr-1" />
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Jun 20, 2023</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-
-        {/* Recent Announcements */}
-        {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center">
-              <AlertCircle className="mr-2 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              Recent Announcements
-            </CardTitle>
-            <CardDescription>
-              Important updates and notices from your departments
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Course registration extended</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Registration deadline extended to June 15</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Library hours updated</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Extended weekend hours now available</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">New computer lab opened</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">24/7 access in Engineering Building</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
     </div>
   );

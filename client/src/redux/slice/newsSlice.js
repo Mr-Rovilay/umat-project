@@ -1,3 +1,4 @@
+// redux/slice/newsSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // import { logoutUser } from './authSlice';
 import api from '@/utils/server';
@@ -24,19 +25,29 @@ export const fetchNewsPosts = createAsyncThunk(
 // Create news post
 export const createNewsPost = createAsyncThunk(
   'news/createNewsPost',
-  async (data, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('content', data.content);
-      formData.append('department', data.department);
-      formData.append('allowLikes', data.allowLikes);
-      formData.append('allowComments', data.allowComments);
-      formData.append('allowReactions', data.allowReactions);
-      if (data.images) {
-        data.images.forEach((image) => formData.append('images', image));
-      }
-      const response = await api.post('/api/news', formData);
+      // If formData is already a FormData object, use it directly
+      // Otherwise, create a new FormData object from the data
+      const payload = formData instanceof FormData 
+        ? formData 
+        : (() => {
+            const newFormData = new FormData();
+            Object.keys(formData).forEach(key => {
+              if (key === 'images' && Array.isArray(formData[key])) {
+                formData[key].forEach(file => newFormData.append('images', file));
+              } else {
+                newFormData.append(key, formData[key]);
+              }
+            });
+            return newFormData;
+          })();
+      
+      const response = await api.post('/api/news', payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data.post;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create news post');
@@ -49,18 +60,29 @@ export const editNewsPost = createAsyncThunk(
   'news/editNewsPost',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      if (data.title) formData.append('title', data.title);
-      if (data.content) formData.append('content', data.content);
-      if (data.department) formData.append('department', data.department);
-      if (data.allowLikes !== undefined) formData.append('allowLikes', data.allowLikes);
-      if (data.allowComments !== undefined) formData.append('allowComments', data.allowComments);
-      if (data.allowReactions !== undefined) formData.append('allowReactions', data.allowReactions);
-      if (data.removeImages) formData.append('removeImages', JSON.stringify(data.removeImages));
-      if (data.images) {
-        data.images.forEach((image) => formData.append('images', image));
-      }
-      const response = await api.put(`/api/news/${id}`, formData);
+      // If data is already a FormData object, use it directly
+      // Otherwise, create a new FormData object from the data
+      const payload = data instanceof FormData 
+        ? data 
+        : (() => {
+            const newFormData = new FormData();
+            Object.keys(data).forEach(key => {
+              if (key === 'images' && Array.isArray(data[key])) {
+                data[key].forEach(file => newFormData.append('images', file));
+              } else if (key === 'removeImages' && Array.isArray(data[key])) {
+                newFormData.append('removeImages', JSON.stringify(data[key]));
+              } else {
+                newFormData.append(key, data[key]);
+              }
+            });
+            return newFormData;
+          })();
+      
+      const response = await api.put(`/api/news/${id}`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data.post;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update news post');

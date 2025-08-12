@@ -4,28 +4,63 @@ import Course from '../models/Course.js';
 import Department from '../models/Department.js';
 import Program from '../models/Program.js';
 import NewsPost from '../models/NewsPost.js';
+import mongoose from 'mongoose';
 
-// Get dashboard analytics
+// Get dashboard analytics (includes all required stats)
 export const getDashboardAnalytics = async (req, res) => {
   try {
-    // Get online users (managed via Socket.IO, passed through middleware or global store)
-    const onlineUsers = global.onlineUsers || []; // Array of { userId, departmentIds }
-    const onlineUserIds = onlineUsers.map(u => u.userId);
+    const departmentId = req.user.department ? req.user.department[0] : null; // Department-specific for this admin
+    const isGlobalAdmin = !departmentId; // Assume global admin if no department
 
-    // Get online users by department
-    const departments = await Department.find().select('name');
-    const onlineUsersByDepartment = await Promise.all(
-      departments.map(async dept => {
-        const userCount = onlineUsers.filter(u =>
-          u.departmentIds.includes(dept._id.toString())
-        ).length;
-        return { department: dept.name, userCount };
-      })
-    );
+    // Online users (using isOnline from User model)
+    const onlineUsers = await User.countDocuments({ isOnline: true, role: 'student' });
+    const onlineUsersByDepartment = await User.aggregate([
+      { $match: { isOnline: true, role: 'student' } },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department',
+          foreignField: '_id',
+          as: 'deptInfo',
+        },
+      },
+      { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$deptInfo._id',
+          departmentName: { $first: '$deptInfo.name' },
+          userCount: { $sum: 1 },
+        },
+      },
+      { $sort: { departmentName: 1 } },
+    ]);
 
-    // Get total payments by department
+    // Total registered students
+    const totalRegisteredStudents = await User.countDocuments({ isRegistered: true, role: 'student' });
+    const registeredStudentsByDepartment = await User.aggregate([
+      { $match: { isRegistered: true, role: 'student' } },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department',
+          foreignField: '_id',
+          as: 'deptInfo',
+        },
+      },
+      { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$deptInfo._id',
+          departmentName: { $first: '$deptInfo.name' },
+          studentCount: { $sum: 1 },
+        },
+      },
+      { $sort: { departmentName: 1 } },
+    ]);
+
+    // Total payments by department
     const paymentStats = await Payment.aggregate([
-      { $match: { status: 'success' } },
+      { $match: { status: 'completed' } }, // Fixed to match Payment model
       {
         $group: {
           _id: '$department',
@@ -49,10 +84,17 @@ export const getDashboardAnalytics = async (req, res) => {
       },
     ]);
 
+    // Filter by department if not global admin
+    const filteredOnlineUsersByDept = isGlobalAdmin ? onlineUsersByDepartment : onlineUsersByDepartment.filter(d => d._id?.toString() === departmentId);
+    const filteredRegisteredStudentsByDept = isGlobalAdmin ? registeredStudentsByDepartment : registeredStudentsByDepartment.filter(d => d._id?.toString() === departmentId);
+    const filteredPaymentStats = isGlobalAdmin ? paymentStats : paymentStats.filter(p => p.department?._id?.toString() === departmentId);
+
     res.status(200).json({
-      onlineUsers: onlineUserIds.length,
-      onlineUsersByDepartment,
-      paymentStats,
+      onlineUsers,
+      onlineUsersByDepartment: filteredOnlineUsersByDept,
+      totalRegisteredStudents,
+      registeredStudentsByDepartment: filteredRegisteredStudentsByDept,
+      paymentStats: filteredPaymentStats,
     });
   } catch (error) {
     console.error('Get Dashboard Analytics Error:', error);
@@ -60,38 +102,4 @@ export const getDashboardAnalytics = async (req, res) => {
   }
 };
 
-
-
-export const getDashboardStats = async (req, res) => {
-  try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    const [courseCount, studentCount, departmentCount, programCount, newsPostCount] = await Promise.all([
-      Course.countDocuments(),
-      User.countDocuments({ role: 'student' }),
-      Department.countDocuments(),
-      Program.countDocuments(),
-      NewsPost.countDocuments(),
-    ]);
-
-    // Example for pending tasks (adjust based on your logic)
-    const pendingTasks = 0; // Placeholder: e.g., unapproved courses or users
-    // Example: const pendingTasks = await Course.countDocuments({ approved: false });
-
-    res.status(200).json({
-      stats: {
-        courses: courseCount,
-        students: studentCount,
-        departments: departmentCount,
-        programs: programCount,
-        newsPosts: newsPostCount,
-        pendingTasks,
-      },
-    });
-  } catch (error) {
-    console.error('Get Dashboard Stats Error:', error);
-    res.status(500).json({ message: 'Server error while fetching dashboard stats' });
-  }
-};
+// Remove getDashboardStats as it's redundant with the enhanced getDashboardAnalytics
