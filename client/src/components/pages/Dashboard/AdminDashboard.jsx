@@ -59,7 +59,6 @@ function AdminDashboard() {
   };
 
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedRegistration, setSelectedRegistration] = useState(null);
 
   useEffect(() => {
     if (user?.department) {
@@ -136,12 +135,11 @@ function AdminDashboard() {
             <Settings className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            {stats.department?.name || 'Department'} Admin Dashboard
+            {stats?.department?.name || 'Department'} Admin Dashboard
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Manage student registrations, verify documents, and monitor department activities.
           </p>
-          <p className="">department of {user?.department?.name}</p>
         </div>
 
         {/* Stats Overview */}
@@ -559,192 +557,6 @@ function AdminDashboard() {
             </div>
           </div>
         </div>
-
-        {/* Registration Detail Modal */}
-        {selectedRegistration && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Registration Details
-                  </h3>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setSelectedRegistration(null)}
-                  >
-                    Close
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Student Information</h4>
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Name:</span> {selectedRegistration.student?.firstName} {selectedRegistration.student?.lastName}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Student ID:</span> {selectedRegistration.student?.studentId}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Email:</span> {selectedRegistration.student?.email}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Phone:</span> {selectedRegistration.student?.phone}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Academic Information</h4>
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Program:</span> {selectedRegistration.program?.name}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Level:</span> {selectedRegistration.level}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Semester:</span> {selectedRegistration.semester}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Registration Date:</span> {new Date(selectedRegistration.registrationDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Uploaded Documents</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <div className="flex items-center mb-2">
-                        {selectedRegistration.uploads?.courseRegistrationSlip?.verified ? (
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500 mr-2" />
-                        )}
-                        <span className="font-medium">Registration Slip</span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Status: {selectedRegistration.uploads?.courseRegistrationSlip?.verified ? 'Verified' : 'Pending Verification'}
-                      </p>
-                      {selectedRegistration.uploads?.courseRegistrationSlip?.url && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(selectedRegistration.uploads.courseRegistrationSlip.url, '_blank')}
-                          className="w-full"
-                        >
-                          <Download className="h-4 w-4 mr-1" /> View Document
-                        </Button>
-                      )}
-                      {!selectedRegistration.uploads?.courseRegistrationSlip?.verified && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleVerifyDocument(selectedRegistration._id, 'courseRegistrationSlip', false)}
-                          className="w-full mt-2"
-                        >
-                          Verify Document
-                        </Button>
-                      )}
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <div className="flex items-center mb-2">
-                        {selectedRegistration.uploads?.schoolFeesReceipt?.verified ? (
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500 mr-2" />
-                        )}
-                        <span className="font-medium">Fees Receipt</span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Status: {selectedRegistration.uploads?.schoolFeesReceipt?.verified ? 'Verified' : 'Pending Verification'}
-                      </p>
-                      {selectedRegistration.uploads?.schoolFeesReceipt?.url && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(selectedRegistration.uploads.schoolFeesReceipt.url, '_blank')}
-                          className="w-full"
-                        >
-                          <Download className="h-4 w-4 mr-1" /> View Document
-                        </Button>
-                      )}
-                      {!selectedRegistration.uploads?.schoolFeesReceipt?.verified && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleVerifyDocument(selectedRegistration._id, 'schoolFeesReceipt', false)}
-                          className="w-full mt-2"
-                        >
-                          Verify Document
-                        </Button>
-                      )}
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <div className="flex items-center mb-2">
-                        {selectedRegistration.uploads?.hallDuesReceipt?.verified ? (
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500 mr-2" />
-                        )}
-                        <span className="font-medium">Hall Dues Receipt</span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Status: {selectedRegistration.uploads?.hallDuesReceipt?.verified ? 'Verified' : 'Pending Verification'}
-                      </p>
-                      {selectedRegistration.uploads?.hallDuesReceipt?.url && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(selectedRegistration.uploads.hallDuesReceipt.url, '_blank')}
-                          className="w-full"
-                        >
-                          <Download className="h-4 w-4 mr-1" /> View Document
-                        </Button>
-                      )}
-                      {!selectedRegistration.uploads?.hallDuesReceipt?.verified && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleVerifyDocument(selectedRegistration._id, 'hallDuesReceipt', false)}
-                          className="w-full mt-2"
-                        >
-                          Verify Document
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {selectedRegistration.courses && selectedRegistration.courses.length > 0 && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Registered Courses</h4>
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <ul className="divide-y divide-gray-200 dark:divide-gray-600">
-                        {selectedRegistration.courses.map((course, index) => (
-                          <li key={index} className="py-2">
-                            <p className="text-gray-700 dark:text-gray-300">
-                              <span className="font-medium">{course.title}</span> ({course.code})
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.unit} unit{course.unit !== 1 ? 's' : ''}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

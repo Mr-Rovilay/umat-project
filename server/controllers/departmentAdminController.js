@@ -251,94 +251,6 @@ export const getDepartmentRegistrationStats = async (req, res) => {
 };
 
 // Get detailed student registrations with documents
-// export const getDepartmentStudentRegistrations = async (req, res) => {
-//   try {
-//     const departmentId = req.adminDepartment._id;
-//     const { semester, level, status, page = 1, limit = 10 } = req.query;
-    
-//     // Build filter object
-//     const filter = {};
-    
-//     // Add semester filter if provided
-//     if (semester && semester !== 'all') {
-//       filter.semester = semester;
-//     }
-    
-//     // Add level filter if provided
-//     if (level && level !== 'all') {
-//       filter.level = level;
-//     }
-    
-//     // Add document status filter if provided
-//     if (status === 'completed') {
-//       filter['uploads.courseRegistrationSlip.verified'] = true;
-//       filter['uploads.schoolFeesReceipt.verified'] = true;
-//       filter['uploads.hallDuesReceipt.verified'] = true;
-//     } else if (status === 'pending') {
-//       filter.$or = [
-//         { 'uploads.courseRegistrationSlip.verified': false },
-//         { 'uploads.schoolFeesReceipt.verified': false },
-//         { 'uploads.hallDuesReceipt.verified': false }
-//       ];
-//     }
-    
-//     const skip = (page - 1) * limit;
-    
-//     // Get student IDs for this department
-//     const departmentStudents = await User.find({ 
-//       department: departmentId, 
-//       role: 'student' 
-//     }).select('_id');
-//     const studentIds = departmentStudents.map(student => student._id);
-    
-//     // Get registrations with complete student, program, and payment details
-//     const registrations = await CourseRegistration.find({
-//       ...filter,
-//       student: { $in: studentIds }
-//     })
-//       .populate({
-//         path: 'student',
-//         select: 'firstName lastName studentId email phone level department isRegistered'
-//       })
-//       .populate({
-//         path: 'program',
-//         select: 'name degree department'
-//       })
-//       .populate({
-//         path: 'courses',
-//         select: 'title code unit semester program'
-//       })
-//       .populate({
-//         path: 'payment',
-//         select: 'amount status paymentType reference createdAt transactionId receiptUrl'
-//       })
-//       .sort({ createdAt: -1 })
-//       .skip(skip)
-//       .limit(parseInt(limit));
-    
-//     // Get total count for pagination
-//     const total = await CourseRegistration.countDocuments({
-//       ...filter,
-//       student: { $in: studentIds }
-//     });
-    
-//     res.status(200).json({
-//       registrations,
-//       pagination: {
-//         current_page: parseInt(page),
-//         total_pages: Math.ceil(total / limit),
-//         total_records: total,
-//         per_page: parseInt(limit)
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Get Department Student Registrations Error:', error);
-//     res.status(500).json({ message: 'Server error while fetching department student registrations' });
-//   }
-// };
-// controllers/departmentAdminController.js
-
-// Get detailed student registrations with documents
 export const getDepartmentStudentRegistrations = async (req, res) => {
   try {
     const departmentId = req.adminDepartment._id;
@@ -471,8 +383,6 @@ export const verifyStudentDocuments = async (req, res) => {
     res.status(500).json({ message: 'Server error while verifying student documents' });
   }
 };
-
-// Get student registration details
 // export const getStudentRegistrationDetails = async (req, res) => {
 //   try {
 //     const { registrationId } = req.params;
@@ -546,5 +456,29 @@ export const getStudentRegistrationDetails = async (req, res) => {
   } catch (error) {
     console.error('Get Student Registration Details Error:', error);
     res.status(500).json({ message: 'Server error while fetching student registration details' });
+  }
+};
+
+// controllers/departmentAdminController.js
+export const fetchAdminDepartments = async (req, res) => {
+  try {
+    const { departmentIds } = req.body;
+    if (!departmentIds || !Array.isArray(departmentIds) || departmentIds.length === 0) {
+      return res.status(400).json({ message: 'Valid department IDs are required' });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can access department details' });
+    }
+
+    const departments = await Department.find({
+      _id: { $in: departmentIds },
+      admins: req.user._id
+    }).select('_id name programs');
+
+    res.status(200).json({ departments });
+  } catch (error) {
+    console.error('Fetch Admin Departments Error:', error);
+    res.status(500).json({ message: 'Server error while fetching department details' });
   }
 };
