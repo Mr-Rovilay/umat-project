@@ -104,6 +104,12 @@ export const deleteCourse = createAsyncThunk(
   }
 );
 
+export const selectTotalEnrolledCourses = (state) => 
+  state.courses.myCourses.reduce(
+    (total, reg) => total + (reg?.courses?.length || 0), 
+    0
+  );
+
 const courseSlice = createSlice({
   name: 'courses',
   initialState: {

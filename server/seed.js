@@ -20,40 +20,54 @@ const seedAdmins = async () => {
     // Define admin data
     const admins = [
       {
-        firstName: 'Admin',
-        lastName: 'One',
-        email: 'admin@example.com',
-        password: await bcrypt.hash('password123', 10),
-        role: 'admin',
-        secretKey: await bcrypt.hash('ADMINSECRET1', 10),
-        department: ['68933b957e68b2ca3e75d31e'],
-      },
-      {
-        firstName: 'Admin3',
-        lastName: 'One3',
-        email: 'admin3@example.com',
-        password: await bcrypt.hash('password123', 10),
-        role: 'admin',
-        secretKey: await bcrypt.hash('ADMINSECRET13', 10),
-        department: ['68933a938fd0c35bb24a23ac'],
-      },
-      {
         firstName: 'Admin1',
         lastName: 'One',
+        referenceNumber: 'ADMIN1',
         email: 'admin1@example.com',
         password: await bcrypt.hash('password123', 10),
         role: 'admin',
-        secretKey: await bcrypt.hash('ADMINSECRET11', 10),
-        department: ['68933a778fd0c35bb24a23a8'],
+        secretKey: await bcrypt.hash('ADMINSECRET1', 10),
+        department: ['6899ebc1693e0d4bed3d9f9e'],
       },
       {
         firstName: 'Admin2',
-        lastName: 'One2',
+        lastName: 'One3',
+        referenceNumber: 'ADMIN2',
         email: 'admin2@example.com',
         password: await bcrypt.hash('password123', 10),
         role: 'admin',
+        secretKey: await bcrypt.hash('ADMINSECRET13', 10),
+        department: ['689b0c3197f4407c07fd8ac0'],
+      },
+      {
+        firstName: 'Admin3',
+        lastName: 'One',
+        referenceNumber: 'ADMIN3',
+        email: 'admin3@example.com',
+        password: await bcrypt.hash('password123', 10),
+        role: 'admin',
+        secretKey: await bcrypt.hash('ADMINSECRET11', 10),
+        department: ['689b0d1497f4407c07fd8acb'],
+      },
+      {
+        firstName: 'Admin4',
+        lastName: 'One2',
+        referenceNumber: 'ADMIN4',
+        email: 'admin4@example.com',
+        password: await bcrypt.hash('password123', 10),
+        role: 'admin',
         secretKey: await bcrypt.hash('ADMINSECRET12', 10),
-        department: ['68933a288fd0c35bb24a23a4'],
+        department: ['689b0d2897f4407c07fd8acc'],
+      },
+         {
+        firstName: 'Admin5',
+        lastName: 'One2',
+        referenceNumber: 'ADMIN5',
+        email: 'admin5@example.com',
+        password: await bcrypt.hash('password123', 10),
+        role: 'admin',
+        secretKey: await bcrypt.hash('ADMINSECRET12', 10),
+        department: ['689b0d4097f4407c07fd8acd'],
       }
     ];
 
@@ -61,12 +75,14 @@ const seedAdmins = async () => {
     const createdAdmins = await User.insertMany(admins);
 
     // Create a mapping of department IDs to admin IDs
-    const departmentAdminMap = {
-      '68933b957e68b2ca3e75d31e': [createdAdmins[0]._id], // Admin One
-      '68933a938fd0c35bb24a23ac': [createdAdmins[1]._id], // Admin3
-      '68933a778fd0c35bb24a23a8': [createdAdmins[2]._id], // Admin1
-      '68933a288fd0c35bb24a23a4': [createdAdmins[3]._id], // Admin2
-    };
+const departmentAdminMap = {
+  '6899ebc1693e0d4bed3d9f9e': [createdAdmins[0]._id], // Admin One
+  '689b0c3197f4407c07fd8ac0': [createdAdmins[1]._id], // Admin3
+  '689b0d1497f4407c07fd8acb': [createdAdmins[2]._id], // Admin1
+  '689b0d2897f4407c07fd8acc': [createdAdmins[3]._id], // Admin2
+  '689b0d4097f4407c07fd8acd': [createdAdmins[4]._id], // Admin2
+};
+
 
     // Update each department with its admin(s)
     for (const [departmentId, adminIds] of Object.entries(departmentAdminMap)) {

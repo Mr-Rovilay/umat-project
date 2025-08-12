@@ -57,7 +57,7 @@ export const login = async (req, res) => {
       }
     }
 
-    await User.findByIdAndUpdate(user._id, { isOnline: true });
+    await User.findByIdAndUpdate(user._id, { isOnline: true }, { new: true });
     global.io.emit('activeStudents', await User.countDocuments({ isOnline: true, role: 'student' }));
 
     generateToken(res, user._id);
@@ -68,6 +68,7 @@ export const login = async (req, res) => {
       email: user.email,
       role: user.role,
       firstName: user.firstName,
+      isOnline: user.isOnline,
       redirectUrl,
     });
   } catch (error) {

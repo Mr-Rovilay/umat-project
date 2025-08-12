@@ -141,6 +141,7 @@ function AdminDashboard() {
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Manage student registrations, verify documents, and monitor department activities.
           </p>
+          <p className="">department of {user?.department?.name}</p>
         </div>
 
         {/* Stats Overview */}
@@ -338,6 +339,36 @@ function AdminDashboard() {
                     <div>
                       <CardTitle className="text-lg">Create News</CardTitle>
                       <CardDescription>Create department news</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+              <Link to="/dashboard/programs">
+              <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+                <CardHeader>
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                      <Newspaper className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Manage Programs</CardTitle>
+                      <CardDescription>manage departmental programs</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+              <Link to="/dashboard/departments">
+              <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+                <CardHeader>
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                      <Newspaper className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Department</CardTitle>
+                      <CardDescription>Manage department</CardDescription>
                     </div>
                   </div>
                 </CardHeader>

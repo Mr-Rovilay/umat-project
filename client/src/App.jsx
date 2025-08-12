@@ -25,6 +25,7 @@ import Profile from "./components/pages/Profile";
 import PaymentConfirmation from "./components/pages/PaymentConfirmation";
 import PaymentHistory from "./components/pages/PaymentHistory";
 import PaymentCallback from "./components/PaymentCallback ";
+import RegistrationDetails from "./components/pages/RegistrationDetails";
 
 function App() {
   useEffect(() => {
@@ -64,6 +65,14 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <CreateNewsPost />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/dashboard/registration/:registrationId"
+            element={
+              <ProtectedRoute role="admin">
+                <RegistrationDetails />
               </ProtectedRoute>
             }
           />

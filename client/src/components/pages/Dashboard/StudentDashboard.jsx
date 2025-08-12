@@ -1,23 +1,44 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   GraduationCap, 
   BookOpen, 
-  Calendar, 
-  TrendingUp, 
-  Award,
-  Users,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   CreditCard
 } from 'lucide-react';
+import { selectTotalEnrolledCourses } from '@/redux/slice/courseSlice';
 
 function StudentDashboard() {
   const { user } = useSelector((state) => state.auth);
+  const { isLoading, error } = useSelector((state) => state.courses);
+  const totalEnrolledCourses = useSelector(selectTotalEnrolledCourses);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-700 dark:text-gray-300">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Error loading dashboard
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -37,6 +58,7 @@ function StudentDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {/* Enrolled Courses Card */}
           <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -47,25 +69,16 @@ function StudentDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">6</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Active courses</p>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {totalEnrolledCourses}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {totalEnrolledCourses === 1 ? 'Active course' : 'Active courses'}
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">CWA</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">3.75</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Current average</p>
-            </CardContent>
-          </Card>
+          {/* Add other dashboard cards here */}
         </div>
 
         {/* Main Actions */}
@@ -79,20 +92,12 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Available Courses</CardTitle>
-                    <CardDescription>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Browse and register for new courses
-                    </CardDescription>
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
-                  <span>Explore courses</span>
-                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </CardContent>
             </Card>
           </Link>
 
@@ -105,23 +110,14 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">My Courses</CardTitle>
-                    <CardDescription>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       View your enrolled courses and progress
-                    </CardDescription>
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
-                  <span>View my courses</span>
-                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </CardContent>
             </Card>
           </Link>
-
 
           <Link to="/courses/register">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
@@ -132,24 +128,16 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Course Registration</CardTitle>
-                    <CardDescription>
-                    Enrolled courses and progress
-                    </CardDescription>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Register for new courses
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
-                  <span>View my courses</span>
-                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </CardContent>
             </Card>
           </Link>
 
-            <Link to="/student/payments/history">
+          <Link to="/student/payments/history">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
               <CardHeader>
                 <div className="flex items-center space-x-3">
@@ -158,20 +146,12 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Payment History</CardTitle>
-                    <CardDescription>
-                   Check your payment History
-                    </CardDescription>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      View your payment records
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm text-emerald-600 dark:text-emerald-400">
-                  <span>View my courses</span>
-                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </CardContent>
             </Card>
           </Link>
         </div>

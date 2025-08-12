@@ -1,4 +1,5 @@
 // models/CourseRegistration.js
+
 import mongoose from 'mongoose';
 
 const courseRegistrationSchema = new mongoose.Schema({
@@ -85,10 +86,10 @@ const courseRegistrationSchema = new mongoose.Schema({
     enum: ['pending', 'complete', 'failed'],
     default: 'pending'
   },
-  payment: { 
+  payments: [{ // Make sure this is plural and is an array
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Payment' 
-  },
+  }],
   paymentType: {
     type: String,
     enum: ['school_fees', 'hall_dues', null],

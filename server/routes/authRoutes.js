@@ -11,7 +11,7 @@ router.post('/login', login);
 router.put('/user', protect, updateUser);
 router.get('/user', protect, getUser);
 router.post('/logout', protect, async (req, res) => {
-  await User.findByIdAndUpdate(req.user._id, { isOnline: false });
+  await User.findByIdAndUpdate(req.user._id, { isOnline: false }, { new: true });
   global.io.emit('activeStudents', await User.countDocuments({ isOnline: true, role: 'student' }));
   res.clearCookie('jwt', {
     httpOnly: true,
