@@ -24,7 +24,7 @@ const PaymentCallback  = () => {
   }, [location, navigate]);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-pad-container bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Processing Payment...</h2>

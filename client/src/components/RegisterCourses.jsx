@@ -335,7 +335,7 @@ const RegisterCourses = () => {
 
   if (registrationSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-pad-container bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg">
             <CardContent className="pt-6">
@@ -438,7 +438,7 @@ const RegisterCourses = () => {
                         Amount:
                       </span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        GH₵ {" "}
+                        GH₵{" "}
                         {(
                           registrationData.paymentDetails?.amount ||
                           (registrationData.semester === "First Semester"
@@ -519,7 +519,7 @@ const RegisterCourses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="max-pad-container bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
@@ -633,68 +633,6 @@ const RegisterCourses = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Course Selection */}
-              {/* {availableCourses.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      Available Courses
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Selected: {selectedCourses.length} courses
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300"
-                      >
-                        Total Units: {calculateTotalUnits()}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2 border rounded-lg">
-                    {coursesLoading ? (
-                      <div className="col-span-2 flex justify-center items-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-                      </div>
-                    ) : (
-                      availableCourses.map((course) => (
-                        <div
-                          key={course._id}
-                          className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-                        >
-                          <Checkbox
-                            id={course._id}
-                            checked={selectedCourses.includes(course._id)}
-                            onCheckedChange={(isChecked) =>
-                              handleCourseSelection(course._id, isChecked)
-                            }
-                            className="mt-1"
-                          />
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <Label
-                                htmlFor={course._id}
-                                className="font-medium cursor-pointer"
-                              >
-                                {course.title}
-                              </Label>
-                              <Badge variant="outline" className="text-xs">
-                                {course.unit} unit{course.unit !== 1 ? "s" : ""}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.code} • {course.program.name}
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )} */}
 
               {/* Document Upload */}
               <div className="space-y-4">

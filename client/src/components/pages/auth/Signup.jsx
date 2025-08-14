@@ -134,7 +134,7 @@ const Signup = () => {
   // };
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-10 bg-gray-100 dark:bg-gray-900">
+    <div className="max-pad-container flex items-center justify-center pt-10 bg-gray-100 dark:bg-gray-900">
       <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl border-0">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Student Registration</CardTitle>

@@ -13,6 +13,7 @@ import DepartmentsPage from "./components/pages/DepartmentsPage";
 import ProgramsPage from "./components/pages/ProgramsPage";
 import Store from "./redux/store";
 import AdminProgramManagement from "./components/pages/AdminProgramManagement";
+import RegisterCourses from "./components/RegisterCourses";
 import MyCourses from "./components/pages/MyCourses";
 import News from "./components/pages/News";
 import CreateNewsPost from "./components/pages/CreateNewsPost";
@@ -94,6 +95,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* <Route
+            path="/courses/available"
+            element={
+              <ProtectedRoute role="student">
+                <AvailableCourses />
+              </ProtectedRoute>
+            }
+          /> */}
           <Route
           
             path="/payments/verify/:reference"
@@ -116,6 +125,14 @@ function App() {
             element={
               <ProtectedRoute role="student">
                 <PaymentCallback />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/register"
+            element={
+              <ProtectedRoute role="student">
+                <RegisterCourses />
               </ProtectedRoute>
             }
           />
