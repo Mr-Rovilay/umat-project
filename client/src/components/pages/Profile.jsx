@@ -255,26 +255,6 @@ function Profile() {
           <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 hover:shadow-xl transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <BookOpen className="mr-2 h-5 w-5 text-emerald-600" />
-                Course Registration
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Register for your courses for the current semester.
-              </p>
-              <Button
-                onClick={() => navigate('/courses/register')}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-              >
-                Register Now (Courses)
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 hover:shadow-xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center">
                 <Newspaper className="mr-2 h-5 w-5 text-emerald-600" />
                 Departmental News
               </CardTitle>
@@ -387,17 +367,14 @@ function Profile() {
                       <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                       <span className="text-gray-700 dark:text-gray-300">Program:</span>
                     </div>
-                    {user?.program && user.program.length > 0 ? (
+             
                       <div className="ml-8 space-y-2">
-                        {(Array.isArray(user.program) ? user.program : [user.program]).map((prog, index) => (
-                          <Badge key={index} variant="secondary" className="mr-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                            {prog?.name || prog || 'Unknown Program'}
+                        
+                          <Badge variant="secondary" className="mr-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                         {user?.program?.name}
                           </Badge>
-                        ))}
+                      
                       </div>
-                    ) : (
-                      <p className="ml-8 text-gray-500 dark:text-gray-400">No programs assigned</p>
-                    )}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-3">

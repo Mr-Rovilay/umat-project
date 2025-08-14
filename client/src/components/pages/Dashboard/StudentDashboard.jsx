@@ -59,7 +59,7 @@ function StudentDashboard() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {/* Enrolled Courses Card */}
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
+          {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Enrolled Courses</CardTitle>
@@ -76,14 +76,14 @@ function StudentDashboard() {
                 {totalEnrolledCourses === 1 ? 'Active course' : 'Active courses'}
               </p>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Add other dashboard cards here */}
         </div>
 
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <Link to="/courses/available">
+          {/* <Link to="/courses/available">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
               <CardHeader>
                 <div className="flex items-center space-x-3">
@@ -99,7 +99,7 @@ function StudentDashboard() {
                 </div>
               </CardHeader>
             </Card>
-          </Link>
+          </Link> */}
 
           <Link to="/courses/my-courses">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
@@ -109,9 +109,9 @@ function StudentDashboard() {
                     <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">My Courses</CardTitle>
+                    <CardTitle className="text-lg">My Registration</CardTitle>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      View your enrolled courses and progress
+                      View your registration
                     </p>
                   </div>
                 </div>
@@ -127,9 +127,9 @@ function StudentDashboard() {
                     <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Course Registration</CardTitle>
+                    <CardTitle className="text-lg">Registration</CardTitle>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Register for new courses
+                      Register for your slips for the semester
                     </p>
                   </div>
                 </div>

@@ -79,11 +79,11 @@ export const changePassword = createAsyncThunk(
 );
 
 // Generate reference number utility
-export const generateReferenceNumber = () => {
-  const timestamp = Date.now().toString();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `REF-${timestamp.slice(-6)}-${random}`;
-};
+// export const generateReferenceNumber = () => {
+//   const timestamp = Date.now().toString();
+//   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+//   return `REF-${timestamp.slice(-6)}-${random}`;
+// };
 
 const authSlice = createSlice({
   name: 'auth',

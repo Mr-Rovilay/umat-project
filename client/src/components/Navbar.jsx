@@ -119,7 +119,7 @@ const Navbar = () => {
               </div>
             </NavLink>
           )}
-             {user?.role === 'student' && (
+             {/* {user?.role === 'student' && (
               <NavLink
                 to="/departments"
                 className={({ isActive }) =>
@@ -132,7 +132,7 @@ const Navbar = () => {
               >
                 Departments
               </NavLink>
-               )}
+               )} */}
               {user?.role === 'admin' && (
                 <NavLink
                   to="/dashboard"

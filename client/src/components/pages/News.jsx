@@ -1,3 +1,5 @@
+// components/News.jsx
+
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -80,50 +82,180 @@ const News = () => {
   const [showComments, setShowComments] = useState({});
   const [activeTab, setActiveTab] = useState("all");
 
-  useEffect(() => {
-    dispatch(
-      fetchNewsPosts({
-        department:
-          selectedDepartment !== "all" ? selectedDepartment : undefined,
-      })
-    );
-    dispatch(getAllDepartments());
-  }, [dispatch, selectedDepartment]);
 
+  // Initialize selected department based on user role
+  useEffect(() => {
+    if (user && departments.length > 0) {
+      if (user.role === "admin") {
+        // For admins, default to "all" to see all departments they have access to
+        setSelectedDepartment("all");
+      } else if (user.role === "student") {
+        // For students, default to their department if they have one
+        if (user.department) {
+          const userDeptId =
+            typeof user.department === "object"
+              ? user.department._id
+              : user.department;
+          setSelectedDepartment(userDeptId);
+        } else {
+          // If student has no department, select the first available department
+          setSelectedDepartment(departments[0]?._id || "all");
+        }
+      } else {
+        // For other roles, default to "all"
+        setSelectedDepartment("all");
+      }
+    }
+  }, [user, departments]);
+
+  // Fetch news posts when department changes
+  useEffect(() => {
+    // Only fetch if we have a user and departments are loaded
+    if (user && departments.length > 0) {
+      dispatch(
+        fetchNewsPosts({
+          department:
+            selectedDepartment === "all" ? undefined : selectedDepartment,
+        })
+      );
+    }
+  }, [dispatch, selectedDepartment, user, departments]);
+
+  const userDepartmentNames = useMemo(() => {
+    if (!user || !user.department) return [];
+
+    // Handle both array and single department cases
+    const departmentIds = Array.isArray(user.department)
+      ? user.department.map((dept) =>
+          typeof dept === "object" ? dept._id : dept
+        )
+      : [
+          typeof user.department === "object"
+            ? user.department._id
+            : user.department,
+        ];
+
+    return departments
+      .filter((dept) => departmentIds.includes(dept._id))
+      .map((dept) => dept.name);
+  }, [user, departments]);
+
+  // Fetch departments
+  useEffect(() => {
+    dispatch(getAllDepartments());
+  }, [dispatch]);
+
+  // Handle errors
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
   }, [error]);
 
+  // Fix the department comparison logic
   const filteredNewsPosts = useMemo(() => {
     return newsPosts.filter((post) => {
-      const isInMyDepartment = user?.department?._id === post.department?._id;
+      // Get the user's department ID(s)
+      const userDepartmentIds = Array.isArray(user?.department)
+        ? user.department.map((dept) =>
+            typeof dept === "object" ? dept._id : dept
+          )
+        : user?.department
+        ? [
+            typeof user.department === "object"
+              ? user.department._id
+              : user.department,
+          ]
+        : [];
+
+      // Check if the post's department matches any of the user's departments
+      const isInMyDepartment = userDepartmentIds.some(
+        (deptId) =>
+          deptId ===
+          (typeof post.department === "object"
+            ? post.department._id
+            : post.department)
+      );
+
       const searchLower = searchQuery.toLowerCase();
 
+      // For "my-department" tab, filter posts from user's department
+      const shouldShowPost =
+        activeTab === "my-department" ? isInMyDepartment : true;
+
       return (
-        (selectedDepartment === "all" ||
-          post.department?._id === selectedDepartment) &&
-        (activeTab === "all" ||
-          (activeTab === "my-department" && isInMyDepartment)) &&
+        shouldShowPost &&
         (searchQuery === "" ||
           post.title?.toLowerCase().includes(searchLower) ||
           post.content?.toLowerCase().includes(searchLower) ||
-          post.department?.name.toLowerCase().includes(searchLower) ||
+          (typeof post.department === "object"
+            ? post.department.name.toLowerCase().includes(searchLower)
+            : "") ||
           `${post.postedBy?.firstName} ${post.postedBy?.lastName}`
             .toLowerCase()
             .includes(searchLower))
       );
     });
-  }, [newsPosts, selectedDepartment, activeTab, user, searchQuery]);
+  }, [newsPosts, activeTab, user, searchQuery]);
 
+  // Get available departments based on user role
   const availableDepartments = useMemo(() => {
-    if (user?.role === "student" && user.department) {
-      return departments.filter((dept) => dept._id === user.department._id);
+    if (user?.role === "admin") {
+      // For admins, show all departments
+      return departments;
+    } else if (user?.role === "student") {
+      // For students, show all departments (they can view any department's news)
+      return departments;
     }
     return departments;
   }, [departments, user]);
 
+  // Handle department change
+  const handleDepartmentChange = useCallback((value) => {
+    setSelectedDepartment(value);
+    // When department changes, switch to "all" tab to show all posts from that department
+    setActiveTab("all");
+  }, []);
+
+  // Handle tab change
+  const handleTabChange = useCallback(
+    (tab) => {
+      setActiveTab(tab);
+
+      if (tab === "all") {
+        // When switching to "all" tab
+        if (user?.role === "admin") {
+          // For admins, show all departments
+          setSelectedDepartment("all");
+        } else if (user?.role === "student") {
+          // For students, show all departments or their department if they have one
+          if (user.department) {
+            const userDeptId =
+              typeof user.department === "object"
+                ? user.department._id
+                : user.department;
+            setSelectedDepartment(userDeptId);
+          } else {
+            setSelectedDepartment("all");
+          }
+        } else {
+          setSelectedDepartment("all");
+        }
+      } else if (tab === "my-department") {
+        // When switching to "my-department" tab
+        if (user?.role === "student" && user.department) {
+          const userDeptId =
+            typeof user.department === "object"
+              ? user.department._id
+              : user.department;
+          setSelectedDepartment(userDeptId);
+        }
+      }
+    },
+    [user]
+  );
+
+  // Handle edit post
   const handleEditPost = useCallback(
     (postId) => {
       navigate(`/news/edit/${postId}`);
@@ -131,11 +263,13 @@ const News = () => {
     [navigate]
   );
 
+  // Handle delete click
   const handleDeleteClick = useCallback((post) => {
     setPostToDelete(post);
     setDeleteDialogOpen(true);
   }, []);
 
+  // Confirm delete
   const confirmDelete = useCallback(async () => {
     if (postToDelete) {
       try {
@@ -149,6 +283,7 @@ const News = () => {
     }
   }, [dispatch, postToDelete]);
 
+  // Handle like post
   const handleLike = useCallback(
     async (postId) => {
       if (!isAuthenticated || user?.role !== "student") {
@@ -165,6 +300,7 @@ const News = () => {
     [dispatch, isAuthenticated, user]
   );
 
+  // Handle reaction
   const handleReaction = useCallback(
     async (postId, type) => {
       if (!isAuthenticated || user?.role !== "student") {
@@ -181,6 +317,7 @@ const News = () => {
     [dispatch, isAuthenticated, user]
   );
 
+  // Handle comment
   const handleComment = useCallback(
     async (postId) => {
       if (!isAuthenticated || user?.role !== "student") {
@@ -204,19 +341,23 @@ const News = () => {
     [dispatch, isAuthenticated, user, commentInputs]
   );
 
+  // Toggle comments
   const toggleComments = useCallback((postId) => {
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   }, []);
 
+  // Open post dialog
   const openPostDialog = useCallback((post) => {
     setSelectedPost(post);
     setShowComments((prev) => ({ ...prev, [post._id]: true }));
   }, []);
 
+  // Close post dialog
   const closePostDialog = useCallback(() => {
     setSelectedPost(null);
   }, []);
 
+  // Get reaction icon
   const getReactionIcon = useCallback((type) => {
     switch (type) {
       case "smile":
@@ -234,6 +375,7 @@ const News = () => {
     }
   }, []);
 
+  // Get reaction counts
   const getReactionCounts = useCallback((reactions) => {
     const counts = {};
     reactions?.forEach((reaction) => {
@@ -242,6 +384,7 @@ const News = () => {
     return counts;
   }, []);
 
+  // Get user reaction
   const getUserReaction = useCallback(
     (reactions) => {
       return reactions?.find((r) => r.user?._id === user?._id)?.type;
@@ -249,6 +392,7 @@ const News = () => {
     [user]
   );
 
+  // Format date
   const formatDate = useCallback((dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -259,14 +403,9 @@ const News = () => {
     });
   }, []);
 
-  // const canManagePost = useCallback((post) => {
-  //   if (!user || user.role !== 'admin') return false;
-  //   return user.departments?.some(dept => dept._id === post.department?._id);
-  // }, [user]);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-pad-container">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full shadow-lg mb-4">
             <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
@@ -276,10 +415,17 @@ const News = () => {
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-2">
             Stay updated with the latest news and announcements from your
-            department
+            {userDepartmentNames.length > 0 ? (
+              <>
+                {" "}
+                {userDepartmentNames.join(", ")}
+                {userDepartmentNames.length > 1 ? "s" : ""}
+              </>
+            ) : (
+              " department"
+            )}
           </p>
         </div>
-
         <Button
           onClick={() =>
             navigate(
@@ -292,13 +438,11 @@ const News = () => {
           <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
           Back to Dashboard
         </Button>
-
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
         <Card className="mb-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -329,8 +473,8 @@ const News = () => {
               </div>
               <Select
                 value={selectedDepartment}
-                onValueChange={setSelectedDepartment}
-                disabled={activeTab === "my-department" || departmentsLoading}
+                onValueChange={handleDepartmentChange}
+                disabled={departmentsLoading}
                 aria-label="Filter by department"
               >
                 <SelectTrigger className="w-full sm:w-48">
@@ -348,10 +492,7 @@ const News = () => {
               <div className="flex gap-2">
                 <Button
                   variant={activeTab === "all" ? "default" : "outline"}
-                  onClick={() => {
-                    setActiveTab("all");
-                    setSelectedDepartment("all");
-                  }}
+                  onClick={() => handleTabChange("all")}
                   className={cn(
                     activeTab === "all" && "bg-emerald-600 hover:bg-emerald-700"
                   )}
@@ -363,7 +504,7 @@ const News = () => {
                   variant={
                     activeTab === "my-department" ? "default" : "outline"
                   }
-                  onClick={() => setActiveTab("my-department")}
+                  onClick={() => handleTabChange("my-department")}
                   className={cn(
                     activeTab === "my-department" &&
                       "bg-emerald-600 hover:bg-emerald-700"
@@ -377,7 +518,6 @@ const News = () => {
             </div>
           </CardContent>
         </Card>
-
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2
@@ -394,10 +534,15 @@ const News = () => {
               />
               <h3 className="text-lg font-medium">No news found</h3>
               <p className="text-gray-600 dark:text-gray-400 text-center">
-                {searchQuery ||
-                selectedDepartment !== "all" ||
-                activeTab !== "all"
-                  ? "No news matches your filters. Try adjusting your search or filters."
+                {searchQuery
+                  ? "No news matches your search. Try a different search term."
+                  : selectedDepartment !== "all"
+                  ? `No news posts found for ${
+                      departments.find((d) => d._id === selectedDepartment)
+                        ?.name || "this department"
+                    }.`
+                  : activeTab !== "all"
+                  ? "No news posts found for your department."
                   : "No news posts are available at the moment."}
               </p>
             </CardContent>
@@ -419,7 +564,6 @@ const News = () => {
                 </Badge>
               )}
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredNewsPosts.map((post) => (
                 <Card
@@ -576,7 +720,6 @@ const News = () => {
             </div>
           </div>
         )}
-
         <Dialog open={!!selectedPost} onOpenChange={closePostDialog}>
           {selectedPost && (
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
@@ -753,7 +896,6 @@ const News = () => {
             </DialogContent>
           )}
         </Dialog>
-
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>

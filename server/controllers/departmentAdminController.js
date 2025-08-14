@@ -1,7 +1,6 @@
 // controllers/departmentAdminController.js
 import CourseRegistration from '../models/CourseRegistration.js';
 import Department from '../models/Department.js';
-import Program from '../models/Program.js';
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import mongoose from 'mongoose';
@@ -304,10 +303,6 @@ export const getDepartmentStudentRegistrations = async (req, res) => {
         select: 'name degree department'
       })
       .populate({
-        path: 'courses',
-        select: 'title code unit semester program'
-      })
-      .populate({
         path: 'payments', // Changed from 'payment' to 'payments'
         select: 'amount status paymentType reference createdAt transactionId'
       })
@@ -438,10 +433,6 @@ export const getStudentRegistrationDetails = async (req, res) => {
       .populate({
         path: 'program',
         select: 'name degree department duration'
-      })
-      .populate({
-        path: 'courses',
-        select: 'title code unit semester program'
       })
       .populate({
         path: 'payments', // Changed from 'payment' to 'payments'

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { getUser } from "./redux/slice/authSlice";
@@ -11,14 +11,9 @@ import AdminDepartmentManagement from "./components/pages/AdminDepartmentManagem
 import AdminDashboard from "./components/pages/Dashboard/AdminDashboard";
 import DepartmentsPage from "./components/pages/DepartmentsPage";
 import ProgramsPage from "./components/pages/ProgramsPage";
-import AboutPage from "./components/pages/AboutPage";
 import Store from "./redux/store";
 import AdminProgramManagement from "./components/pages/AdminProgramManagement";
-import AvailableCourses from "./components/AvailableCourses";
-import RegisterCourses from "./components/RegisterCourses";
 import MyCourses from "./components/pages/MyCourses";
-import CreateCourse from "./components/pages/CreateCourse";
-import ManageCourses from "./components/pages/ManageCourses";
 import News from "./components/pages/News";
 import CreateNewsPost from "./components/pages/CreateNewsPost";
 import Profile from "./components/pages/Profile";
@@ -48,7 +43,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/about" element={<AboutPage />} />
           <Route path="/programs" element={<ProgramsPage />} />
           <Route
             path="/profile"
@@ -101,19 +95,12 @@ function App() {
             }
           />
           <Route
-            path="/courses/available"
-            element={
-              <ProtectedRoute role="student">
-                <AvailableCourses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment/confirmation/:reference"
+          
+            path="/payments/verify/:reference"
             element={
               <ProtectedRoute role="student">
                 <PaymentConfirmation />
-              </ProtectedRoute>
+               </ProtectedRoute>
             }
           />
                     <Route
@@ -133,34 +120,10 @@ function App() {
             }
           />
           <Route
-            path="/courses/register"
-            element={
-              <ProtectedRoute role="student">
-                <RegisterCourses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/courses/my-courses"
             element={
               <ProtectedRoute role="student">
                 <MyCourses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/courses/create"
-            element={
-              <ProtectedRoute role="admin">
-                <CreateCourse />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/courses/manage"
-            element={
-              <ProtectedRoute role="admin">
-                <ManageCourses />
               </ProtectedRoute>
             }
           />

@@ -22,6 +22,7 @@ export const registerStudent = async (req, res) => {
       program: program ? [program] : [], // Store as array for consistency
       level,
       isRegistered: true,
+      isOnline: true,
     });
 
     generateToken(res, student._id);
@@ -32,6 +33,7 @@ export const registerStudent = async (req, res) => {
       role: student.role,
       firstName: student.firstName,
       isRegistered: student.isRegistered,
+      isOnline: student.isOnline,
       success: true,
       message: "User created successfully",
     });

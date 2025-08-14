@@ -29,7 +29,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   clearError as clearAuthError,
   clearRegistrationSuccess,
-  generateReferenceNumber,
+  // generateReferenceNumber,
   registerUser,
 } from "@/redux/slice/authSlice";
 import { getAllDepartments, clearError as clearDepartmentError } from "@/redux/slice/departmentSlice";
@@ -74,7 +74,8 @@ const Signup = () => {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      referenceNumber: generateReferenceNumber(),
+      // referenceNumber: generateReferenceNumber(),
+      referenceNumber: "",
       department: "",
       program: "",
       level: "",
@@ -126,11 +127,11 @@ const Signup = () => {
   };
 
   // Generate new reference number
-  const handleGenerateReference = () => {
-    const newRefNumber = generateReferenceNumber();
-    setValue("referenceNumber", newRefNumber);
-    toast.success("New reference number generated");
-  };
+  // const handleGenerateReference = () => {
+  //   const newRefNumber = generateReferenceNumber();
+  //   setValue("referenceNumber", newRefNumber);
+  //   toast.success("New reference number generated");
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center pt-10 bg-gray-100 dark:bg-gray-900">
@@ -355,20 +356,20 @@ const Signup = () => {
                     <Input
                       id="referenceNumber"
                       type="text"
-                      readOnly
+                     placeholder="REF-NUMBER"
                       className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white bg-gray-50 dark:bg-gray-600"
                       {...field}
                     />
                   )}
                 />
-                <Button
+                {/* <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   onClick={handleGenerateReference}
                 >
                   <RefreshCw className="w-4 h-4" />
-                </Button>
+                </Button> */}
               </div>
               {errors.referenceNumber && (
                 <p className="text-sm text-red-600 dark:text-red-400">

@@ -121,7 +121,7 @@ const RegisterCourses = () => {
       [name]: value,
     }));
     // Reset selected courses when form data changes
-    setSelectedCourses([]);
+    // setSelectedCourses([]);
   };
 
   const handleFileChange = (e) => {
@@ -134,13 +134,13 @@ const RegisterCourses = () => {
     }
   };
 
-  const handleCourseSelection = (courseId, isChecked) => {
-    if (isChecked) {
-      setSelectedCourses((prev) => [...prev, courseId]);
-    } else {
-      setSelectedCourses((prev) => prev.filter((id) => id !== courseId));
-    }
-  };
+  // const handleCourseSelection = (courseId, isChecked) => {
+  //   if (isChecked) {
+  //     setSelectedCourses((prev) => [...prev, courseId]);
+  //   } else {
+  //     setSelectedCourses((prev) => prev.filter((id) => id !== courseId));
+  //   }
+  // };
 
   const calculateTotalUnits = () => {
     return selectedCourses.reduce((total, courseId) => {
@@ -154,10 +154,10 @@ const RegisterCourses = () => {
       toast.error("Please select program, level, and semester");
       return false;
     }
-    if (selectedCourses.length === 0) {
-      toast.error("Please select at least one course");
-      return false;
-    }
+    // if (selectedCourses.length === 0) {
+    //   toast.error("Please select at least one course");
+    //   return false;
+    // }
     if (!files.courseRegistrationSlip) {
       toast.error("Course registration slip is required");
       return false;
@@ -190,7 +190,7 @@ const RegisterCourses = () => {
         program: formData.program,
         level: formData.level,
         semester: formData.semester,
-        courseIds: selectedCourses,
+        // courseIds: selectedCourses,
         courseRegistrationSlip: files.courseRegistrationSlip,
         schoolFeesReceipt: files.schoolFeesReceipt,
         hallDuesReceipt: files.hallDuesReceipt,
@@ -234,9 +234,9 @@ const RegisterCourses = () => {
               totalUnits:
                 response.data.data?.registrationInfo?.totalUnits ||
                 calculateTotalUnits(),
-              coursesCount:
-                response.data.data?.registrationInfo?.coursesCount ||
-                selectedCourses.length,
+              // coursesCount:
+              //   response.data.data?.registrationInfo?.coursesCount ||
+              //   selectedCourses.length,
               paymentDetails: response.data.data?.paymentDetails || {
                 amount:
                   response.data.data?.paymentDetails?.amount ||
@@ -438,7 +438,7 @@ const RegisterCourses = () => {
                         Amount:
                       </span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        ₦
+                        GH₵ {" "}
                         {(
                           registrationData.paymentDetails?.amount ||
                           (registrationData.semester === "First Semester"
@@ -472,7 +472,7 @@ const RegisterCourses = () => {
                   <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <p>
                       <span className="font-medium">Program:</span>{" "}
-                      {registrationData.program}
+                      {registrationData.program.name}
                     </p>
                     <p>
                       <span className="font-medium">Level:</span>{" "}
@@ -481,14 +481,6 @@ const RegisterCourses = () => {
                     <p>
                       <span className="font-medium">Semester:</span>{" "}
                       {registrationData.semester}
-                    </p>
-                    <p>
-                      <span className="font-medium">Total Units:</span>{" "}
-                      {registrationData.totalUnits}
-                    </p>
-                    <p>
-                      <span className="font-medium">Courses:</span>{" "}
-                      {registrationData.coursesCount}
                     </p>
                   </div>
                 </div>
@@ -612,7 +604,6 @@ const RegisterCourses = () => {
                         <SelectItem value="200">200 Level</SelectItem>
                         <SelectItem value="300">300 Level</SelectItem>
                         <SelectItem value="400">400 Level</SelectItem>
-                        <SelectItem value="500">500 Level</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -644,7 +635,7 @@ const RegisterCourses = () => {
               </div>
 
               {/* Course Selection */}
-              {availableCourses.length > 0 && (
+              {/* {availableCourses.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -703,7 +694,7 @@ const RegisterCourses = () => {
                     )}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Document Upload */}
               <div className="space-y-4">

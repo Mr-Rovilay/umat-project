@@ -40,6 +40,18 @@ const uploadFile = async (file, folder) => {
   }
 };
 
+// Helper function to transform Cloudinary URL for PDFs
+const transformCloudinaryUrl = (url) => {
+  if (!url) return url;
+  
+  // Check if it's a PDF and from Cloudinary
+  if (url.includes('.pdf') && url.includes('cloudinary.com')) {
+    // Add the PDF viewer transformation
+    return url.replace('/upload/', '/upload/fl_pdf_viewer/');
+  }
+  return url;
+};
+
 // Generate payment reference
 const generatePaymentReference = () => {
   return `CR_${Date.now()}_${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -153,7 +165,7 @@ export const registerCourses = async (req, res) => {
     const files = req.files || {};
     
     // Parse form data - handle both JSON strings and direct form fields
-    let program, level, semester, courseIds;
+    let program, level, semester;
     
     // Check if data is coming as JSON string (common with multipart forms)
     if (req.body.data) {
@@ -162,7 +174,7 @@ export const registerCourses = async (req, res) => {
         program = parsedData.program;
         level = parsedData.level;
         semester = parsedData.semester;
-        courseIds = parsedData.courseIds;
+        // courseIds = parsedData.courseIds;
       } catch (e) {
         return res.status(400).json({ 
           success: false,
@@ -174,30 +186,16 @@ export const registerCourses = async (req, res) => {
       program = req.body.program;
       level = req.body.level;
       semester = req.body.semester;
-      courseIds = req.body.courseIds;
+      // courseIds = req.body.courseIds;
     }
     
     const studentId = req.user._id;
 
     // Validate required fields
-    if (!program || !level || !semester || !courseIds) {
+    if (!program || !level || !semester) {
       return res.status(400).json({ 
         success: false,
-        message: "Program, level, semester, and courseIds are required" 
-      });
-    }
-
-    // Parse courseIds
-    let parsedCourseIds;
-    try {
-      parsedCourseIds = Array.isArray(courseIds) ? courseIds : JSON.parse(courseIds);
-      if (!Array.isArray(parsedCourseIds)) {
-        throw new Error('courseIds must be an array');
-      }
-    } catch (e) {
-      return res.status(400).json({ 
-        success: false,
-        message: "Invalid courseIds format - must be an array" 
+        message: "Program, level and semester are required" 
       });
     }
 
@@ -206,12 +204,6 @@ export const registerCourses = async (req, res) => {
       return res.status(400).json({ 
         success: false,
         message: "Invalid program ID" 
-      });
-    }
-    if (!parsedCourseIds.every(id => mongoose.isValidObjectId(id))) {
-      return res.status(400).json({ 
-        success: false,
-        message: "Invalid course ID(s)" 
       });
     }
 
@@ -225,7 +217,7 @@ export const registerCourses = async (req, res) => {
     }
 
     // Validate level and semester
-    if (!["100", "200", "300", "400", "500"].includes(level)) {
+    if (!["100", "200", "300", "400"].includes(level)) {
       return res.status(400).json({ 
         success: false,
         message: "Invalid level" 
@@ -251,26 +243,6 @@ export const registerCourses = async (req, res) => {
         message: "Already registered for this semester. Update your existing registration instead." 
       });
     }
-
-    // Validate courses
-    const courses = await Course.find({ 
-      _id: { $in: parsedCourseIds }, 
-      program, 
-      level, 
-      semester,
-      isActive: true
-    });
-
-    // Check unit limits
-    const totalUnits = courses.reduce((sum, course) => sum + course.unit, 0);
-    if (totalUnits > 24) {
-      return res.status(400).json({ 
-        success: false,
-        message: `Total units (${totalUnits}) exceed maximum allowed (24)` 
-      });
-    }
-
-    // Initialize uploads object
     const uploads = {
       courseRegistrationSlip: null,
       schoolFeesReceipt: null,
@@ -337,7 +309,7 @@ export const registerCourses = async (req, res) => {
           program,
           level,
           semester,
-          courses: parsedCourseIds,
+          // courses: parsedCourseIds,
           uploads,
           paymentStatus: 'pending'
         });
@@ -352,6 +324,7 @@ export const registerCourses = async (req, res) => {
           registration: registration._id,
           semester,
           amount: departmentalDuesAmount,
+          currency: 'GHS', // Set currency to Ghana Cedis
           paymentType: 'departmental_dues',
           reference: paymentReference,
           status: 'pending'
@@ -371,6 +344,7 @@ export const registerCourses = async (req, res) => {
             paymentDetails: {
               reference: paymentReference,
               amount: departmentalDuesAmount,
+               currency: 'GHS',
               type: 'departmental_dues',
               description: `Departmental dues for ${semester} - ${level} level`
             },
@@ -379,8 +353,8 @@ export const registerCourses = async (req, res) => {
               program: programExists.name,
               level,
               semester,
-              totalUnits,
-              coursesCount: parsedCourseIds.length
+              // totalUnits,
+              // coursesCount: parsedCourseIds.length
             }
           }
         });
@@ -405,9 +379,9 @@ export const registerCourses = async (req, res) => {
           program,
           level,
           semester,
-          courses: parsedCourseIds,
+          // courses: parsedCourseIds,
           uploads,
-          paymentStatus: needsSchoolFeesPayment ? 'pending' : 'complete'
+          paymentStatus: needsSchoolFeesPayment ? 'pending' : 'successful'
         });
 
         if (needsSchoolFeesPayment) {
@@ -420,6 +394,7 @@ export const registerCourses = async (req, res) => {
             registration: registration._id,
             semester,
             amount: schoolFeesAmount,
+                        currency: 'GHS', 
             paymentType: 'school_fees',
             reference: paymentReference,
             status: 'pending'
@@ -437,6 +412,7 @@ export const registerCourses = async (req, res) => {
               paymentDetails: {
                 reference: paymentReference,
                 amount: schoolFeesAmount,
+                            currency: 'GHS', 
                 type: 'school_fees',
                 description: `School fees for ${semester} - ${level} level`
               },
@@ -450,14 +426,9 @@ export const registerCourses = async (req, res) => {
             }
           });
         } else {
-          // Update user courses and owing status
-          await User.findByIdAndUpdate(studentId, {
-            $addToSet: { courses: { $each: parsedCourseIds } },
-            owingStatus: false
-          });
 
           const populatedRegistration = await CourseRegistration.findById(registration._id)
-            .populate('courses', 'title code unit semester program')
+            // .populate('courses', 'title code unit semester program')
             .populate('program', 'name degree department')
             .populate('student', 'firstName lastName studentId');
 
@@ -527,6 +498,7 @@ export const getAvailableCourses = async (req, res) => {
 };
 
 // Student: Get own registered courses
+// Student: Get own registered courses
 export const getMyCourses = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -537,7 +509,6 @@ export const getMyCourses = async (req, res) => {
     
     const registrations = await CourseRegistration.find({ student: userId })
       .populate('program', 'name degree')
-      .populate('courses', 'title code unit semester');
     
     // Transform uploads to documents array
     const transformedRegistrations = registrations.map((reg) => ({
@@ -546,25 +517,25 @@ export const getMyCourses = async (req, res) => {
         {
           _id: new mongoose.Types.ObjectId(),
           type: 'CourseRegistrationSlip',
-          url: reg.uploads.courseRegistrationSlip?.url,
+          url: transformCloudinaryUrl(reg.uploads.courseRegistrationSlip?.url),
           verified: reg.uploads.courseRegistrationSlip?.verified || false,
         },
         {
           _id: new mongoose.Types.ObjectId(),
           type: 'SchoolFeesReceipt',
-          url: reg.uploads.schoolFeesReceipt?.url,
+          url: transformCloudinaryUrl(reg.uploads.schoolFeesReceipt?.url),
           verified: reg.uploads.schoolFeesReceipt?.verified || false,
         },
         {
           _id: new mongoose.Types.ObjectId(),
           type: 'HallDuesReceipt',
-          url: reg.uploads.hallDuesReceipt?.url,
+          url: transformCloudinaryUrl(reg.uploads.hallDuesReceipt?.url),
           verified: reg.uploads.hallDuesReceipt?.verified || false,
         },
       ],
     }));
     
-    const payments = await Payment.find({ student: userId }).select('semester amount status createdAt transactionId');
+    const payments = await Payment.find({ student: userId }).select('semester amount status currency createdAt transactionId');
     
     res.status(200).json({
       registrations: transformedRegistrations,

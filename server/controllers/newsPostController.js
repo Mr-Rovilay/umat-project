@@ -90,6 +90,8 @@ export const createNewsPost = async (req, res) => {
   }
 };
 
+// controllers/newsPostController.js
+
 // Get news posts by department or all posts
 export const getNewsPosts = async (req, res) => {
   try {
@@ -106,13 +108,45 @@ export const getNewsPosts = async (req, res) => {
         return res.status(200).json({ posts: [] });
       }
       
-      query.department = { $in: departmentIds };
-    } else if (department) {
-      // For non-admin users, respect the department filter if provided
-      if (!mongoose.isValidObjectId(department)) {
-        return res.status(400).json({ message: 'Invalid department ID' });
+      // If no specific department is requested, show all departments the admin has access to
+      if (!department || department === 'all') {
+        query.department = { $in: departmentIds };
+      } else {
+        // If a specific department is requested, check if admin has access to it
+        if (!mongoose.isValidObjectId(department)) {
+          return res.status(400).json({ message: 'Invalid department ID' });
+        }
+        
+        const hasAccess = departmentIds.some(id => id.toString() === department);
+        if (!hasAccess) {
+          return res.status(403).json({ message: 'You are not authorized to view posts from this department' });
+        }
+        
+        query.department = department;
       }
-      query.department = department;
+    } 
+    // For students
+    else if (req.user.role === 'student') {
+      // If no specific department is requested, show all posts (student can view any department)
+      if (!department || department === 'all') {
+        // Don't filter by department, show all posts
+      } else {
+        // If a specific department is requested
+        if (!mongoose.isValidObjectId(department)) {
+          return res.status(400).json({ message: 'Invalid department ID' });
+        }
+        
+        query.department = department;
+      }
+    }
+    // For other roles (if any)
+    else {
+      if (department && department !== 'all') {
+        if (!mongoose.isValidObjectId(department)) {
+          return res.status(400).json({ message: 'Invalid department ID' });
+        }
+        query.department = department;
+      }
     }
     
     const posts = await NewsPost.find(query)
@@ -128,7 +162,6 @@ export const getNewsPosts = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching news posts' });
   }
 };
-
 // Student: Like a news post
 export const likeNewsPost = async (req, res) => {
   try {

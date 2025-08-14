@@ -8,11 +8,7 @@ import {
   PlusCircle, 
   BookOpen, 
   Users, 
-  BarChart3, 
   Settings, 
-  FileText,
-  Calendar,
-  Bell,
   TrendingUp,
   Newspaper,
   Eye,
@@ -76,7 +72,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (verificationSuccess) {
-      toast.success('Document verification updated successfully');
+     
       dispatch(fetchDepartmentStats());
       dispatch(fetchStudentRegistrations({}));
     }
@@ -128,7 +124,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-pad-container mx-auto">
         {/* Header Section */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg mb-6">
@@ -294,39 +290,7 @@ function AdminDashboard() {
             </Badge>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link to="/courses/create">
-              <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                      <PlusCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">Create Course</CardTitle>
-                      <CardDescription>Add a new course to the system</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-            
-            <Link to="/courses/manage">
-              <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                      <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">Manage Courses</CardTitle>
-                      <CardDescription>Edit or delete existing courses</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">                        
             <Link to="/news/create">
               <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
                 <CardHeader>

@@ -23,10 +23,10 @@ const courseRegistrationSchema = new mongoose.Schema({
     enum: ['First Semester', 'Second Semester'], 
     required: true 
   },
-  courses: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Course' 
-  }],
+  // courses: [{ 
+  //   type: mongoose.Schema.Types.ObjectId, 
+  //   ref: 'Course' 
+  // }],
   uploads: {
     courseRegistrationSlip: {
       url: { 
@@ -109,10 +109,10 @@ const courseRegistrationSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Add virtual for total units
-courseRegistrationSchema.virtual('totalUnits').get(function() {
-  return this.courses.reduce((sum, course) => sum + (course.unit || 0), 0);
-});
+// // Add virtual for total units
+// courseRegistrationSchema.virtual('totalUnits').get(function() {
+//   return this.courses.reduce((sum, course) => sum + (course.unit || 0), 0);
+// });
 
 // Update lastUpdated timestamp before saving
 courseRegistrationSchema.pre('save', function(next) {

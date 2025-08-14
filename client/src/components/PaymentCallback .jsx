@@ -16,7 +16,7 @@ const PaymentCallback  = () => {
     
     if (paymentReference) {
       // Redirect to the payment confirmation page
-      navigate(`/payment/confirmation/${paymentReference}`);
+      navigate(`/payments/verify/${paymentReference}`);
     } else {
       // If no reference found, redirect to dashboard
       navigate('/student/dashboard');
