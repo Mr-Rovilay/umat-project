@@ -362,13 +362,13 @@ function Profile() {
                     <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     <span className="text-gray-700 dark:text-gray-300">Role: {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Unknown'}</span>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex">
                     <div className="flex items-center space-x-3">
                       <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                       <span className="text-gray-700 dark:text-gray-300">Program:</span>
                     </div>
              
-                      <div className="ml-8 space-y-2">
+                      <div className="ml-2 space-y-2">
                         
                           <Badge variant="secondary" className="mr-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
                          {user?.program?.name}
@@ -376,13 +376,13 @@ function Profile() {
                       
                       </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex">
                     <div className="flex items-center space-x-3">
                       <AlertCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                       <span className="text-gray-700 dark:text-gray-300">Department:</span>
                     </div>
                     {user?.department && user.department.length > 0 ? (
-                      <div className="ml-8 space-y-2">
+                      <div className="ml-2 space-y-2">
                         {user.department.map((dept, index) => (
                           <Badge key={index} variant="secondary" className="mr-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
                             {dept?.name || dept || 'Unknown Department'}

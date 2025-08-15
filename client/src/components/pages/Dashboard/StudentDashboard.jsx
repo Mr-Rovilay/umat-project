@@ -1,11 +1,7 @@
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  GraduationCap, 
-  BookOpen, 
-  CreditCard
-} from 'lucide-react';
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GraduationCap, BookOpen, CreditCard } from "lucide-react";
 
 function StudentDashboard() {
   const { user } = useSelector((state) => state.auth);
@@ -16,7 +12,9 @@ function StudentDashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-gray-300">Loading dashboard...</p>
+          <p className="text-gray-700 dark:text-gray-300">
+            Loading dashboard...
+          </p>
         </div>
       </div>
     );
@@ -49,55 +47,29 @@ function StudentDashboard() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
             Student Dashboard
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Welcome back, {user?.firstName} {user?.lastName}! Here's an overview of your academic progress.
-          </p>
+          <div className="text-center mb-8">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed transition-all duration-300 transform hover:scale-105">
+              Welcome back,{" "}
+              <Link
+                to="/profile"
+                className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline underline-offset-4 decoration-2 transition-all duration-200 hover:decoration-indigo-500"
+              >
+                {user?.firstName} {user?.lastName}
+              </Link>
+              ! Here's an overview of your academic progress.
+            </p>
+
+            {/* Subtle decorative element */}
+            <div className="mt-4 h-0.5 w-24 bg-gradient-to-r from-transparent via-indigo-400 to-transparent mx-auto opacity-70"></div>
+          </div>
         </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {/* Enrolled Courses Card */}
-          {/* <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Enrolled Courses</CardTitle>
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {totalEnrolledCourses}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {totalEnrolledCourses === 1 ? 'Active course' : 'Active courses'}
-              </p>
-            </CardContent>
-          </Card> */}
-
-          {/* Add other dashboard cards here */}
         </div>
 
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          {/* <Link to="/courses/available">
-            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                    <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Available Courses</CardTitle>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Browse and register for new courses
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link> */}
 
           <Link to="/courses/my-courses">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
