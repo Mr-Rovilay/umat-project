@@ -51,7 +51,7 @@ const getLoginSchema = (isAdminLogin) =>
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, isAuthenticated, user, error } = useSelector((state) => state.auth);
+  const { isLoading, isAuthenticated, user } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -278,16 +278,6 @@ const Login = () => {
               )}
             </Button>
           </form>
-
-          {/* Error Display */}
-          {error && (
-            <div className="mt-4">
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-
           {/* Signup Link */}
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
             Don't have an account?{" "}

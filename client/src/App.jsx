@@ -63,7 +63,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-            <Route
+          <Route
             path="/dashboard/registration/:registrationId"
             element={
               <ProtectedRoute role="admin">
@@ -104,15 +104,14 @@ function App() {
             }
           /> */}
           <Route
-          
             path="/payments/verify/:reference"
             element={
               <ProtectedRoute role="student">
                 <PaymentConfirmation />
-               </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
-                    <Route
+          <Route
             path="/student/payments/history"
             element={
               <ProtectedRoute role="student">
@@ -120,7 +119,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-                    <Route
+          <Route
             path="/payment/callback"
             element={
               <ProtectedRoute role="student">

@@ -34,7 +34,6 @@ import {
 } from "@/redux/slice/authSlice";
 import { getAllDepartments, clearError as clearDepartmentError } from "@/redux/slice/departmentSlice";
 import { getAllPrograms, clearError as clearProgramError } from "@/redux/slice/programSlice";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Zod schema for form validation
 const registerSchema = z
@@ -58,7 +57,7 @@ const registerSchema = z
 const Signup = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading: authLoading, registrationSuccess, error: authError } = useSelector((state) => state.auth);
+  const { isLoading: authLoading, registrationSuccess } = useSelector((state) => state.auth);
   const { departments, isLoading: deptLoading, error: deptError } = useSelector((state) => state.departments);
   const { programs, isLoading: progLoading, error: progError } = useSelector((state) => state.programs);
   const [showPassword, setShowPassword] = useState(false);
@@ -464,17 +463,7 @@ const Signup = () => {
               )}
             </Button>
           </form>
-
-          {/* Error Display */}
-          {(authError || deptError || progError) && (
-            <div className="mt-4">
-              <Alert variant="destructive">
-                <AlertDescription>{authError || deptError || progError}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          {/* Sign-in Link */}
+  {/* Sign-in Link */}
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-500 hover:underline">
