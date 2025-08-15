@@ -131,7 +131,7 @@ function AdminDashboard() {
             <Settings className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            {stats?.department?.name || 'Department'} Admin Dashboard
+            {stats?.department?.name} Admin Dashboard
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Manage student registrations, verify documents, and monitor department activities.

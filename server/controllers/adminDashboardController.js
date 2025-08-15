@@ -1,11 +1,5 @@
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
-import Course from '../models/Course.js';
-import Department from '../models/Department.js';
-import Program from '../models/Program.js';
-import NewsPost from '../models/NewsPost.js';
-import mongoose from 'mongoose';
-
 // Get dashboard analytics (includes all required stats)
 export const getDashboardAnalytics = async (req, res) => {
   try {
@@ -59,30 +53,30 @@ export const getDashboardAnalytics = async (req, res) => {
     ]);
 
     // Total payments by department
-    const paymentStats = await Payment.aggregate([
-      { $match: { status: 'completed' } }, // Fixed to match Payment model
-      {
-        $group: {
-          _id: '$department',
-          totalAmount: { $sum: '$amount' },
-        },
-      },
-      {
-        $lookup: {
-          from: 'departments',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'department',
-        },
-      },
-      { $unwind: '$department' },
-      {
-        $project: {
-          department: '$department.name',
-          totalAmount: 1,
-        },
-      },
-    ]);
+const paymentStats = await Payment.aggregate([
+  { $match: { status: 'successful' } }, // Changed from 'completed' to 'successful'
+  {
+    $group: {
+      _id: '$department',
+      totalAmount: { $sum: '$amount' },
+    },
+  },
+  {
+    $lookup: {
+      from: 'departments',
+      localField: '_id',
+      foreignField: '_id',
+      as: 'department',
+    },
+  },
+  { $unwind: '$department' },
+  {
+    $project: {
+      department: '$department.name',
+      totalAmount: 1,
+    },
+  },
+]);
 
     // Filter by department if not global admin
     const filteredOnlineUsersByDept = isGlobalAdmin ? onlineUsersByDepartment : onlineUsersByDepartment.filter(d => d._id?.toString() === departmentId);
