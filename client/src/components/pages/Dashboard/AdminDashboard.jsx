@@ -1,5 +1,5 @@
 // AdminDashboard.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,9 @@ import {
 function AdminDashboard() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+    const { departments } = useSelector(
+      (state) => state.departments || { departments: [], isLoading: false }
+    );
   const departmentAdminState = useSelector((state) => state.departmentAdmin);
   const { 
     stats, 
@@ -86,6 +89,25 @@ function AdminDashboard() {
     }));
   };
 
+    const userDepartmentNames = useMemo(() => {
+      if (!user || !user.department) return [];
+  
+      // Handle both array and single department cases
+      const departmentIds = Array.isArray(user.department)
+        ? user.department.map((dept) =>
+            typeof dept === "object" ? dept._id : dept
+          )
+        : [
+            typeof user.department === "object"
+              ? user.department._id
+              : user.department,
+          ];
+  
+      return departments
+        .filter((dept) => departmentIds.includes(dept._id))
+        .map((dept) => dept.name);
+    }, [user, departments]);
+
   // Filter registrations based on status
   const filteredRegistrations = registrations.filter(reg => {
     if (filterStatus === 'all') return true;
@@ -130,9 +152,18 @@ function AdminDashboard() {
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg mb-6">
             <Settings className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            {stats?.department?.name} Admin Dashboard
-          </h1>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Admin Dashboard For
+            {userDepartmentNames.length > 0 ? (
+              <>
+                {" "}
+                {userDepartmentNames.join(", ")}
+                {userDepartmentNames.length > 1 ? "s" : ""}
+              </>
+            ) : (
+              " department"
+            )}
+          </p>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Manage student registrations, verify documents, and monitor department activities.
           </p>
