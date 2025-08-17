@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,12 +28,16 @@ const AdminProgramManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     name: '',
-    department: '',
+    department: [], // Changed to array
     duration: '',
     degree: '',
   });
   const [editId, setEditId] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Options for dropdowns
+  const degreeOptions = ['Bachelor', 'Master', 'PhD', 'BSc', 'MSc'];
+  const durationOptions = ['3 years', '4 years', '5 years'];
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'admin') {
@@ -59,7 +62,7 @@ const AdminProgramManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.department || !formData.degree) {
+    if (!formData.name || !formData.department.length || !formData.degree) {
       toast.error('Name, department, and degree are required');
       return;
     }
@@ -68,15 +71,18 @@ const AdminProgramManagement = () => {
     } else {
       await dispatch(createProgram(formData));
     }
-    setFormData({ name: '', department: '', duration: '', degree: '' });
+    setFormData({ name: '', department: [], duration: '', degree: '' });
     setEditId(null);
     setIsDialogOpen(false);
   };
 
   const handleEdit = (prog) => {
+    // Extract department IDs from the array of department objects
+    const departmentIds = prog.department?.map(dept => dept._id) || [];
+    
     setFormData({
       name: prog.name,
-      department: prog.department?._id || '',
+      department: departmentIds,
       duration: prog.duration || '',
       degree: prog.degree || '',
     });
@@ -90,6 +96,23 @@ const AdminProgramManagement = () => {
     }
   };
 
+  const handleDepartmentChange = (value) => {
+    // Toggle department selection
+    if (formData.department.includes(value)) {
+      // Remove if already selected
+      setFormData({
+        ...formData,
+        department: formData.department.filter(id => id !== value)
+      });
+    } else {
+      // Add if not selected
+      setFormData({
+        ...formData,
+        department: [...formData.department, value]
+      });
+    }
+  };
+
   const filteredPrograms = programs.filter((prog) =>
     prog.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -100,7 +123,7 @@ const AdminProgramManagement = () => {
     : departments;
 
   return (
-    <div className="max-pad-container bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
@@ -114,7 +137,7 @@ const AdminProgramManagement = () => {
             Add, edit, or delete programs in your department
           </p>
         </div>
-
+        
         {/* Back to Dashboard */}
         <Button
           onClick={() => navigate('/dashboard')}
@@ -123,14 +146,14 @@ const AdminProgramManagement = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
-
+        
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50/50 dark:bg-red-900/20 dark:border-red-800">
             <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
           </Alert>
         )}
-
+        
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
@@ -144,7 +167,7 @@ const AdminProgramManagement = () => {
             />
           </div>
         </div>
-
+        
         {/* Programs Table */}
         <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg">
           <CardHeader>
@@ -182,61 +205,78 @@ const AdminProgramManagement = () => {
                     </div>
                     <div>
                       <Label htmlFor="department" className="text-gray-700 dark:text-gray-300">
-                        Department
+                        Departments (Select one or more)
                       </Label>
-                      <Select
-                        value={formData.department}
-                        onValueChange={(value) => setFormData({ ...formData, department: value })}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700">
-                          <SelectValue placeholder="Select department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {allowedDepartments?.length > 0 ? (
-                            allowedDepartments.map((dept) => (
-                              <SelectItem key={dept._id} value={dept._id}>
+                      <div className="space-y-2 mt-1">
+                        {allowedDepartments?.length > 0 ? (
+                          allowedDepartments.map((dept) => (
+                            <div key={dept._id} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id={`dept-${dept._id}`}
+                                checked={formData.department.includes(dept._id)}
+                                onChange={() => handleDepartmentChange(dept._id)}
+                                disabled={isLoading}
+                                className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
+                              />
+                              <label htmlFor={`dept-${dept._id}`} className="text-gray-700 dark:text-gray-300">
                                 {dept.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="none" disabled>No departments available</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                              </label>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 dark:text-gray-400">No departments available</p>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="degree" className="text-gray-700 dark:text-gray-300">
                         Degree
                       </Label>
-                      <Input
-                        id="degree"
+                      <Select
                         value={formData.degree}
-                        onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
-                        placeholder="Enter degree (e.g., B.Sc.)"
-                        className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700"
+                        onValueChange={(value) => setFormData({ ...formData, degree: value })}
                         disabled={isLoading}
-                      />
+                      >
+                        <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700">
+                          <SelectValue placeholder="Select degree" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {degreeOptions.map((degree) => (
+                            <SelectItem key={degree} value={degree}>
+                              {degree}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label htmlFor="duration" className="text-gray-700 dark:text-gray-300">
-                        Duration (optional)
+                        Duration
                       </Label>
-                      <Input
-                        id="duration"
+                      <Select
                         value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                        placeholder="Enter duration (e.g., 4 years)"
-                        className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700"
+                        onValueChange={(value) => setFormData({ ...formData, duration: value })}
                         disabled={isLoading}
-                      />
+                      >
+                        <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700">
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {durationOptions.map((duration) => (
+                            <SelectItem key={duration} value={duration}>
+                              {duration}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex justify-end space-x-2">
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          setFormData({ name: '', department: '', duration: '', degree: '' });
+                          setFormData({ name: '', department: [], duration: '', degree: '' });
                           setEditId(null);
                           setIsDialogOpen(false);
                         }}
@@ -268,7 +308,7 @@ const AdminProgramManagement = () => {
                   <thead className="bg-gray-100/50 dark:bg-gray-800/50">
                     <tr>
                       <th className="p-3 text-left text-gray-700 dark:text-gray-300">Program Name</th>
-                      <th className="p-3 text-left text-gray-700 dark:text-gray-300">Department</th>
+                      <th className="p-3 text-left text-gray-700 dark:text-gray-300">Departments</th>
                       <th className="p-3 text-left text-gray-700 dark:text-gray-300">Degree</th>
                       <th className="p-3 text-left text-gray-700 dark:text-gray-300">Duration</th>
                       <th className="p-3 text-left text-gray-700 dark:text-gray-300">Actions</th>
@@ -278,7 +318,12 @@ const AdminProgramManagement = () => {
                     {filteredPrograms.map((prog) => (
                       <tr key={prog._id} className="border-t dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
                         <td className="p-3 text-gray-900 dark:text-gray-100">{prog.name || 'N/A'}</td>
-                        <td className="p-3 text-gray-900 dark:text-gray-100">{prog.department?.name || 'N/A'}</td>
+                        <td className="p-3 text-gray-900 dark:text-gray-100">
+                          {prog.department && prog.department.length > 0 
+                            ? prog.department.map(dept => dept.name).join(', ')
+                            : 'N/A'
+                          }
+                        </td>
                         <td className="p-3 text-gray-900 dark:text-gray-100">{prog.degree || 'N/A'}</td>
                         <td className="p-3 text-gray-900 dark:text-gray-100">{prog.duration || 'N/A'}</td>
                         <td className="p-3 flex gap-2">

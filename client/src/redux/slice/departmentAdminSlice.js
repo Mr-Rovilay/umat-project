@@ -15,7 +15,20 @@ export const fetchDepartmentStats = createAsyncThunk(
   }
 );
 
-// Get student registrations
+// Get online students count
+const getDepartmentOnlineStudentsCount = createAsyncThunk(
+  'departmentAdmin/getOnlineStudentsCount',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/department-admin/online-students-count');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch online students count');
+    }
+  }
+);
+export { getDepartmentOnlineStudentsCount };
+
 export const fetchStudentRegistrations = createAsyncThunk(
   'departmentAdmin/fetchStudentRegistrations',
   async (params, { rejectWithValue }) => {
@@ -63,6 +76,12 @@ const initialState = {
     pendingVerifications: [],
     paymentStats: [],
   },
+  onlineStudents: {
+    onlineStudentsCount: 0,
+    totalStudentsCount: 0,
+    onlinePercentage: 0,
+    departmentId: null
+  },
   registrations: [],
   registrationDetails: null,
   isLoading: false,
@@ -97,6 +116,20 @@ const departmentAdminSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDepartmentStats.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Fetch online students count
+      .addCase(getDepartmentOnlineStudentsCount.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getDepartmentOnlineStudentsCount.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.onlineStudents = action.payload;
+        state.error = null;
+      })
+      .addCase(getDepartmentOnlineStudentsCount.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

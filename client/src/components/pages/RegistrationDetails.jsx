@@ -15,13 +15,13 @@ import {
   Download,
   Calendar,
   Clock,
-  Award
+  Award,
+  Building
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { fetchStudentRegistrationDetails, verifyStudentDocuments } from '@/redux/slice/departmentAdminSlice';
 import { clearError } from '@/redux/slice/authSlice';
-
 function RegistrationDetails() {
   const { registrationId } = useParams();
   const navigate = useNavigate();
@@ -34,22 +34,18 @@ function RegistrationDetails() {
     error, 
     verificationSuccess 
   } = departmentAdminState;
-
   const [activeTab, setActiveTab] = useState('overview');
-
   useEffect(() => {
     if (registrationId) {
       dispatch(fetchStudentRegistrationDetails(registrationId));
     }
   }, [dispatch, registrationId]);
-
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
-
   useEffect(() => {
     if (verificationSuccess) {
       toast.success('Document verification updated successfully');
@@ -57,7 +53,6 @@ function RegistrationDetails() {
       dispatch(fetchStudentRegistrationDetails(registrationId));
     }
   }, [verificationSuccess, dispatch, registrationId]);
-
   const handleVerifyDocument = (documentType, verified) => {
     dispatch(verifyStudentDocuments({
       registrationId,
@@ -65,11 +60,36 @@ function RegistrationDetails() {
       verified: !verified
     }));
   };
-
   const handleGoBack = () => {
     navigate('/dashboard');
   };
-
+  // Helper function to get department names
+// components/RegistrationDetails.jsx
+// Helper function to get department names
+const getDepartmentNames = (departments) => {
+  if (!departments) return 'N/A';
+  
+  // If it's an array
+  if (Array.isArray(departments)) {
+    if (departments.length === 0) return 'N/A';
+    
+    // Handle array of objects (with _id and name)
+    if (typeof departments[0] === 'object' && departments[0] !== null) {
+      return departments.map(dept => dept.name || dept._id || dept).filter(Boolean).join(', ');
+    }
+    
+    // Handle array of strings (IDs)
+    return departments.filter(Boolean).join(', ');
+  }
+  
+  // Handle single object (with _id and name)
+  if (typeof departments === 'object' && departments !== null) {
+    return departments.name || departments._id || 'N/A';
+  }
+  
+  // Handle single string (ID)
+  return departments;
+};
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -84,7 +104,6 @@ function RegistrationDetails() {
       </div>
     );
   }
-
   if (!registrationDetails) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -100,13 +119,11 @@ function RegistrationDetails() {
       </div>
     );
   }
-
   // Calculate registration completion status
   const allVerified = 
     registrationDetails.uploads?.courseRegistrationSlip?.verified && 
     registrationDetails.uploads?.schoolFeesReceipt?.verified && 
     registrationDetails.uploads?.hallDuesReceipt?.verified;
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-pad-container mx-auto">
@@ -139,7 +156,6 @@ function RegistrationDetails() {
             </div>
           </div>
         </div>
-
         {/* Tabs */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
           <nav className="-mb-px flex space-x-8">
@@ -175,7 +191,6 @@ function RegistrationDetails() {
             </button>
           </nav>
         </div>
-
         {/* Tab Content */}
         <div className="mb-12">
           {activeTab === 'overview' && (
@@ -199,7 +214,7 @@ function RegistrationDetails() {
                     <div className="flex justify-between">
                       <span className="text-gray-500 dark:text-gray-400">Student ID:</span>
                       <span className="font-medium">
-                        {registrationDetails.student?._id}
+                        {registrationDetails.student?.referenceNumber || registrationDetails.student?._id}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -217,7 +232,7 @@ function RegistrationDetails() {
                     <div className="flex justify-between">
                       <span className="text-gray-500 dark:text-gray-400">Level:</span>
                       <span className="font-medium">
-                        {registrationDetails.level}
+                        {registrationDetails.student?.level || registrationDetails.level}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -229,7 +244,6 @@ function RegistrationDetails() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Academic Information */}
               <Card>
                 <CardHeader>
@@ -250,6 +264,12 @@ function RegistrationDetails() {
                       <span className="text-gray-500 dark:text-gray-400">Degree:</span>
                       <span className="font-medium">
                         {registrationDetails.program?.degree}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 dark:text-gray-400">Department:</span>
+                      <span className="font-medium">
+                        {getDepartmentNames(registrationDetails.student?.department)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -279,7 +299,6 @@ function RegistrationDetails() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Registration Status */}
               <Card>
                 <CardHeader>
@@ -334,7 +353,6 @@ function RegistrationDetails() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Payment Status */}
               <Card>
                 <CardHeader>
@@ -382,7 +400,6 @@ function RegistrationDetails() {
               </Card>
             </div>
           )}
-
           {activeTab === 'documents' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Registration Slip */}
@@ -444,7 +461,6 @@ function RegistrationDetails() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Fees Receipt */}
               <Card>
                 <CardHeader>
@@ -504,7 +520,6 @@ function RegistrationDetails() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Hall Dues Receipt */}
               <Card>
                 <CardHeader>
@@ -566,98 +581,97 @@ function RegistrationDetails() {
               </Card>
             </div>
           )}
-{activeTab === 'payments' && (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <CreditCard className="h-5 w-5 mr-2 text-emerald-600" />
-        Payment History
-      </CardTitle>
-      <CardDescription>
-        Payment records for this registration
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      {registrationDetails.payments && registrationDetails.payments.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Type
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Reference
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {registrationDetails.payments.map((payment, index) => (
-                <tr key={payment._id || index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(payment.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {payment.paymentType?.replace('_', ' ') || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    ₦{payment.amount?.toLocaleString() || '0'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {payment.status === 'successful' ? (
-                      <Badge className="bg-green-100 text-green-800">Successful</Badge>
-                    ) : payment.status === 'pending' ? (
-                      <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800">Failed</Badge>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {payment.reference || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {payment.receiptUrl && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.open(payment.receiptUrl, '_blank')}
-                      >
-                        <Download className="h-4 w-4 mr-1" /> Receipt
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400">No payment records found.</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Payment Status: {registrationDetails.paymentStatus === 'complete' ? 'Complete' : 'Pending'}
-          </p>
-        </div>
-      )}
-    </CardContent>
-  </Card>
-)}
+          {activeTab === 'payments' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CreditCard className="h-5 w-5 mr-2 text-emerald-600" />
+                  Payment History
+                </CardTitle>
+                <CardDescription>
+                  Payment records for this registration
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {registrationDetails.payments && registrationDetails.payments.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Type
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Reference
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {registrationDetails.payments.map((payment, index) => (
+                          <tr key={payment._id || index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(payment.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {payment.paymentType?.replace('_', ' ') || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              ₦{payment.amount?.toLocaleString() || '0'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {payment.status === 'successful' ? (
+                                <Badge className="bg-green-100 text-green-800">Successful</Badge>
+                              ) : payment.status === 'pending' ? (
+                                <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
+                              ) : (
+                                <Badge className="bg-red-100 text-red-800">Failed</Badge>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {payment.reference || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              {payment.receiptUrl && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.open(payment.receiptUrl, '_blank')}
+                                >
+                                  <Download className="h-4 w-4 mr-1" /> Receipt
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">No payment records found.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      Payment Status: {registrationDetails.paymentStatus === 'complete' ? 'Complete' : 'Pending'}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
 export default RegistrationDetails;

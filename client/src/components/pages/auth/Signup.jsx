@@ -29,11 +29,16 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   clearError as clearAuthError,
   clearRegistrationSuccess,
-  // generateReferenceNumber,
   registerUser,
 } from "@/redux/slice/authSlice";
-import { getAllDepartments, clearError as clearDepartmentError } from "@/redux/slice/departmentSlice";
-import { getAllPrograms, clearError as clearProgramError } from "@/redux/slice/programSlice";
+import {
+  getAllDepartments,
+  clearError as clearDepartmentError,
+} from "@/redux/slice/departmentSlice";
+import {
+  getAllPrograms,
+  clearError as clearProgramError,
+} from "@/redux/slice/programSlice";
 
 // Zod schema for form validation
 const registerSchema = z
@@ -57,12 +62,23 @@ const registerSchema = z
 const Signup = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading: authLoading, registrationSuccess } = useSelector((state) => state.auth);
-  const { departments, isLoading: deptLoading, error: deptError } = useSelector((state) => state.departments);
-  const { programs, isLoading: progLoading, error: progError } = useSelector((state) => state.programs);
+  const { isLoading: authLoading, registrationSuccess } = useSelector(
+    (state) => state.auth
+  );
+  const {
+    departments,
+    isLoading: deptLoading,
+    error: deptError,
+  } = useSelector((state) => state.departments);
+  const {
+    programs,
+    isLoading: progLoading,
+    error: progError,
+  } = useSelector((state) => state.programs);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("");
+  const [availableDepartments, setAvailableDepartments] = useState([]);
 
   const {
     control,
@@ -73,7 +89,6 @@ const Signup = () => {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      // referenceNumber: generateReferenceNumber(),
       referenceNumber: "",
       department: "",
       program: "",
@@ -81,18 +96,45 @@ const Signup = () => {
     },
   });
 
-  // Fetch departments on mount
+  // Fetch programs on mount
   useEffect(() => {
-    dispatch(getAllDepartments());
+    dispatch(getAllPrograms());
   }, [dispatch]);
 
-  // Fetch programs when department changes
+  // Fetch departments when program changes
   useEffect(() => {
-    if (selectedDepartment) {
-      dispatch(getAllPrograms(selectedDepartment));
-      setValue("program", ""); // Reset program when department changes
+    if (selectedProgram) {
+      // Find the selected program
+      const program = programs.find((p) => p._id === selectedProgram);
+      if (program && program.department && program.department.length > 0) {
+        // Extract department IDs from the program
+        const departmentIds = program.department.map((dept) => dept._id);
+        // Fetch departments by IDs
+        dispatch(getAllDepartments({ departmentIds }));
+        setValue("department", ""); // Reset department when program changes
+      } else {
+        setAvailableDepartments([]);
+        setValue("department", "");
+      }
+    } else {
+      setAvailableDepartments([]);
+      setValue("department", "");
     }
-  }, [selectedDepartment, dispatch, setValue]);
+  }, [selectedProgram, programs, dispatch, setValue]);
+
+  // Update available departments when departments are loaded
+  useEffect(() => {
+    if (selectedProgram && departments.length > 0) {
+      const program = programs.find((p) => p._id === selectedProgram);
+      if (program && program.department && program.department.length > 0) {
+        const departmentIds = program.department.map((dept) => dept._id);
+        const filteredDepts = departments.filter((dept) =>
+          departmentIds.includes(dept._id)
+        );
+        setAvailableDepartments(filteredDepts);
+      }
+    }
+  }, [departments, selectedProgram, programs]);
 
   // Handle successful registration
   useEffect(() => {
@@ -125,18 +167,13 @@ const Signup = () => {
     }
   };
 
-  // Generate new reference number
-  // const handleGenerateReference = () => {
-  //   const newRefNumber = generateReferenceNumber();
-  //   setValue("referenceNumber", newRefNumber);
-  //   toast.success("New reference number generated");
-  // };
-
   return (
     <div className="max-pad-container flex items-center justify-center pt-10 dark:bg-gray-900">
       <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl border-0">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Student Registration</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Student Registration
+          </CardTitle>
           <CardDescription className="text-muted-foreground">
             Create your account to get started
           </CardDescription>
@@ -194,7 +231,6 @@ const Signup = () => {
                 )}
               </div>
             </div>
-
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2">
@@ -220,7 +256,6 @@ const Signup = () => {
                 </p>
               )}
             </div>
-
             {/* Phone */}
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-2">
@@ -247,44 +282,9 @@ const Signup = () => {
               )}
             </div>
 
-            {/* Department */}
-            <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
-              <Controller
-                name="department"
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setSelectedDepartment(e.target.value);
-                    }}
-                  >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept._id} value={dept._id}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              {errors.department && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {errors.department.message}
-                </p>
-              )}
-              {deptLoading && <p className="text-sm text-gray-500">Loading departments...</p>}
-              {deptError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{deptError}</p>
-              )}
-            </div>
-
             {/* Program */}
             <div className="space-y-2">
-              <Label htmlFor="program">Program</Label>
+              <Label htmlFor="program">Program / Faculty</Label>
               <Controller
                 name="program"
                 control={control}
@@ -292,7 +292,10 @@ const Signup = () => {
                   <select
                     {...field}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"
-                    disabled={!selectedDepartment || progLoading}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setSelectedProgram(e.target.value);
+                    }}
                   >
                     <option value="">Select Program</option>
                     {programs.map((prog) => (
@@ -308,9 +311,51 @@ const Signup = () => {
                   {errors.program.message}
                 </p>
               )}
-              {progLoading && <p className="text-sm text-gray-500">Loading programs...</p>}
+              {progLoading && (
+                <p className="text-sm text-gray-500">Loading programs...</p>
+              )}
               {progError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{progError}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {progError}
+                </p>
+              )}
+            </div>
+
+            {/* Department */}
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Controller
+                name="department"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"
+                    disabled={!selectedProgram || deptLoading}
+                  >
+                    <option value="">Select Department</option>
+                    {availableDepartments.map((dept) => (
+                      <option key={dept._id} value={dept._id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
+              {errors.department && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {errors.department.message}
+                </p>
+              )}
+              {deptLoading && (
+                <p className="text-sm text-gray-500 flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
+                </p>
+              )}
+              {deptError && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {deptError}
+                </p>
               )}
             </div>
 
@@ -343,7 +388,10 @@ const Signup = () => {
 
             {/* Reference Number */}
             <div className="space-y-2">
-              <Label htmlFor="referenceNumber" className="flex items-center gap-2">
+              <Label
+                htmlFor="referenceNumber"
+                className="flex items-center gap-2"
+              >
                 <Hash className="w-4 h-4" />
                 Reference Number
               </Label>
@@ -355,20 +403,12 @@ const Signup = () => {
                     <Input
                       id="referenceNumber"
                       type="text"
-                     placeholder="REF-NUMBER"
+                      placeholder="REF-NUMBER"
                       className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white bg-gray-50 dark:bg-gray-600"
                       {...field}
                     />
                   )}
                 />
-                {/* <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleGenerateReference}
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </Button> */}
               </div>
               {errors.referenceNumber && (
                 <p className="text-sm text-red-600 dark:text-red-400">
@@ -402,7 +442,11 @@ const Signup = () => {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -414,7 +458,10 @@ const Signup = () => {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="flex items-center gap-2">
+              <Label
+                htmlFor="confirmPassword"
+                className="flex items-center gap-2"
+              >
                 <Lock className="w-4 h-4" />
                 Confirm Password
               </Label>
@@ -437,7 +484,11 @@ const Signup = () => {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (
@@ -463,7 +514,8 @@ const Signup = () => {
               )}
             </Button>
           </form>
-  {/* Sign-in Link */}
+
+          {/* Sign-in Link */}
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-500 hover:underline">

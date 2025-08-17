@@ -28,6 +28,7 @@ import {
   verifyStudentDocuments,
   clearError 
 } from '@/redux/slice/departmentAdminSlice';
+import OnlineStudentsCard from '@/components/OnlineStudentsCard';
 
 function AdminDashboard() {
   const dispatch = useDispatch();
@@ -238,6 +239,7 @@ function AdminDashboard() {
               <p className="text-sm text-gray-500 dark:text-gray-400">Department programs</p>
             </CardContent>
           </Card>
+          <OnlineStudentsCard/>
         </div>
 
         {/* Document Upload Statistics */}
@@ -468,7 +470,7 @@ function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">{registration.program?.name}</div>
+                            <div className="text-sm text-gray-900 dark:text-white truncate w-30">{registration.program?.name}</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">{registration.level} Level</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">

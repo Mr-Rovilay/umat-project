@@ -425,14 +425,24 @@ export const getStudentRegistrationDetails = async (req, res) => {
     const registration = await CourseRegistration.findOne({
       _id: registrationId
     })
-      .populate({
+    .populate({
         path: 'student',
         match: { department: { $in: [departmentId] } },
-        select: 'firstName lastName studentId email phone department level isRegistered owingStatus'
+        select: 'firstName lastName studentId email phone department level isRegistered owingStatus',
+        populate: {
+          path: 'department',
+          model: 'Department',
+          select: 'name'
+        }
       })
       .populate({
         path: 'program',
-        select: 'name degree department duration'
+        select: 'name degree department duration',
+        populate: {
+          path: 'department',
+          model: 'Department',
+          select: 'name'
+        }
       })
       .populate({
         path: 'payments', // Changed from 'payment' to 'payments'
@@ -471,5 +481,42 @@ export const fetchAdminDepartments = async (req, res) => {
   } catch (error) {
     console.error('Fetch Admin Departments Error:', error);
     res.status(500).json({ message: 'Server error while fetching department details' });
+  }
+};
+
+// controllers/departmentAdminController.js
+
+// Get count of online students in the department
+export const getDepartmentOnlineStudentsCount = async (req, res) => {
+  try {
+    const departmentId = req.adminDepartment._id;
+    
+    // Count online students in the department
+    const onlineStudentsCount = await User.countDocuments({
+      department: { $in: [departmentId] },
+      role: 'student',
+      isOnline: true
+    });
+    
+    // Get total students in the department for comparison
+    const totalStudentsCount = await User.countDocuments({
+      department: { $in: [departmentId] },
+      role: 'student'
+    });
+    
+    // Calculate percentage of online students
+    const onlinePercentage = totalStudentsCount > 0 
+      ? Math.round((onlineStudentsCount / totalStudentsCount) * 100) 
+      : 0;
+    
+    res.status(200).json({
+      onlineStudentsCount,
+      totalStudentsCount,
+      onlinePercentage,
+      departmentId
+    });
+  } catch (error) {
+    console.error('Get Department Online Students Count Error:', error);
+    res.status(500).json({ message: 'Server error while fetching online students count' });
   }
 };

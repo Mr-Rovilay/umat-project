@@ -5,7 +5,8 @@ import {
   getDepartmentStudentRegistrations,
   verifyStudentDocuments,
   getStudentRegistrationDetails,
-  fetchAdminDepartments
+  fetchAdminDepartments,
+  getDepartmentOnlineStudentsCount
 } from '../controllers/departmentAdminController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { restrictToDepartmentAdmin } from '../middleware/roleMiddleware.js';
@@ -22,6 +23,8 @@ router.get('/stats', getDepartmentRegistrationStats);
 
 // Get student registrations in this department
 router.get('/registrations', getDepartmentStudentRegistrations);
+
+router.get('/online-students-count', getDepartmentOnlineStudentsCount);
 
 // Verify student documents
 router.post('/verify-documents', verifyStudentDocuments);

@@ -22,6 +22,7 @@ import PaymentConfirmation from "./components/pages/PaymentConfirmation";
 import PaymentHistory from "./components/pages/PaymentHistory";
 import PaymentCallback from "./components/PaymentCallback ";
 import RegistrationDetails from "./components/pages/RegistrationDetails";
+import ProgramDetailPage from "./components/pages/ProgramDetailPage";
 
 function App() {
   useEffect(() => {
@@ -53,6 +54,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/programs/:id" element={<ProgramDetailPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
           <Route path="/news" element={<News />} />
           <Route

@@ -106,31 +106,6 @@ function StudentDashboard() {
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Owing Status</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                {owingStatus.hasOutstanding ? (
-                  <span className="text-red-600 dark:text-red-400">Owing</span>
-                ) : (
-                  <span className="text-green-600 dark:text-green-400">Cleared</span>
-                )}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {owingStatus.hasOutstanding
-                  ? `₦₵{(owingStatus.schoolFees + owingStatus.departmentalDues).toLocaleString()} outstanding`
-                  : "All fees paid"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <Link to="/courses/my-courses">
@@ -193,6 +168,24 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Departmental News</CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Stay updated with department news
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+                   <Link to="/programs">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <Newspaper className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Bsc Programs At Main Campus TARKWA</CardTitle>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Stay updated with department news
                     </p>

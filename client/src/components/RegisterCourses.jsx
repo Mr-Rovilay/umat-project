@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   BookOpen,
   Upload,
@@ -26,7 +25,6 @@ import {
   ArrowLeft,
   Loader2,
 } from "lucide-react";
-
 // Redux actions
 import { getAllPrograms } from "@/redux/slice/programSlice";
 import {
@@ -39,7 +37,6 @@ import { clearError } from "@/redux/slice/authSlice";
 const RegisterCourses = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   // Redux state
   const { programs, isLoading: programsLoading } = useSelector(
     (state) => state.programs
@@ -55,9 +52,7 @@ const RegisterCourses = () => {
     isLoading: paymentLoading,
     error: paymentError,
   } = useSelector((state) => state.payment);
-
   // Local state
-  const [selectedCourses, setSelectedCourses] = useState([]);
   const [formData, setFormData] = useState({
     program: "",
     level: "",
@@ -72,10 +67,34 @@ const RegisterCourses = () => {
   const [registrationData, setRegistrationData] = useState(null);
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
 
+  // Get user's program ID - handle both cases where program might be an object or just an ID
+  const userProgramId = user?.program?._id || user?.program;
+
   // Fetch programs on component mount
   useEffect(() => {
+    console.log("Fetching programs...");
     dispatch(getAllPrograms());
   }, [dispatch]);
+
+  // Debug logs
+  useEffect(() => {
+    console.log("User Program ID:", userProgramId);
+    console.log("Programs from Redux:", programs);
+    console.log("Programs loading:", programsLoading);
+  }, [userProgramId, programs, programsLoading]);
+
+  // Set the user's program as default when programs are loaded
+  useEffect(() => {
+    if (programs.length > 0 && userProgramId && !formData.program) {
+      const userProgram = programs.find((p) => p._id === userProgramId);
+      if (userProgram) {
+        setFormData((prev) => ({
+          ...prev,
+          program: userProgram._id,
+        }));
+      }
+    }
+  }, [programs, userProgramId, formData.program]);
 
   // Fetch available courses when program, level, or semester changes
   useEffect(() => {
@@ -120,8 +139,6 @@ const RegisterCourses = () => {
       ...prev,
       [name]: value,
     }));
-    // Reset selected courses when form data changes
-    // setSelectedCourses([]);
   };
 
   const handleFileChange = (e) => {
@@ -134,30 +151,11 @@ const RegisterCourses = () => {
     }
   };
 
-  // const handleCourseSelection = (courseId, isChecked) => {
-  //   if (isChecked) {
-  //     setSelectedCourses((prev) => [...prev, courseId]);
-  //   } else {
-  //     setSelectedCourses((prev) => prev.filter((id) => id !== courseId));
-  //   }
-  // };
-
-  const calculateTotalUnits = () => {
-    return selectedCourses.reduce((total, courseId) => {
-      const course = availableCourses.find((c) => c._id === courseId);
-      return total + (course ? course.unit : 0);
-    }, 0);
-  };
-
   const validateForm = () => {
     if (!formData.program || !formData.level || !formData.semester) {
       toast.error("Please select program, level, and semester");
       return false;
     }
-    // if (selectedCourses.length === 0) {
-    //   toast.error("Please select at least one course");
-    //   return false;
-    // }
     if (!files.courseRegistrationSlip) {
       toast.error("Course registration slip is required");
       return false;
@@ -171,44 +169,31 @@ const RegisterCourses = () => {
       );
       return false;
     }
-    if (calculateTotalUnits() > 24) {
-      toast.error("Total units cannot exceed 24");
-      return false;
-    }
     return true;
   };
-
-  // In RegisterCourses.jsx, update the handleSubmit function
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     try {
       // Prepare data for the Redux thunk
       const registrationData = {
         program: formData.program,
         level: formData.level,
         semester: formData.semester,
-        // courseIds: selectedCourses,
         courseRegistrationSlip: files.courseRegistrationSlip,
         schoolFeesReceipt: files.schoolFeesReceipt,
         hallDuesReceipt: files.hallDuesReceipt,
       };
-
       const result = await dispatch(registerCourses(registrationData));
-
       if (result.meta.requestStatus === "fulfilled") {
         const response = result.payload;
-
         if (response.success && response.data) {
           if (response.data.paymentRequired) {
-            // Check the structure of the response to find the registration ID
             const registrationId =
               response.data.data?.registrationId ||
               response.data.registrationId ||
               response.data._id;
-
             if (!registrationId) {
               console.error(
                 "Registration ID not found in response:",
@@ -220,23 +205,21 @@ const RegisterCourses = () => {
               return;
             }
 
-            // Set registration data and show payment screen
+            // Get the program object from the response
+            const programInfo =
+              response.data.data?.registrationInfo?.program ||
+              response.data.registration?.program ||
+              response.data.program;
+
             setRegistrationData({
               registrationId: registrationId,
-              program:
-                response.data.data?.registrationInfo?.program ||
-                formData.program,
+              program: programInfo,
               level:
                 response.data.data?.registrationInfo?.level || formData.level,
               semester:
                 response.data.data?.registrationInfo?.semester ||
                 formData.semester,
-              totalUnits:
-                response.data.data?.registrationInfo?.totalUnits ||
-                calculateTotalUnits(),
-              // coursesCount:
-              //   response.data.data?.registrationInfo?.coursesCount ||
-              //   selectedCourses.length,
+              totalUnits: response.data.data?.registrationInfo?.totalUnits || 0,
               paymentDetails: response.data.data?.paymentDetails || {
                 amount:
                   response.data.data?.paymentDetails?.amount ||
@@ -255,19 +238,31 @@ const RegisterCourses = () => {
                       : "School fees"
                   } for ${formData.semester} - ${formData.level} level`,
               },
+              // Store the full registration data
+              registration:
+                response.data.data?.registration || response.data.registration,
             });
             setShowPaymentScreen(true);
             toast.success(response.message || "Registration successful");
           } else {
+            // Get the program object from the response
+            const programInfo =
+              response.data.registration?.program || response.data.program;
+
+            setRegistrationData({
+              registration: response.data.registration,
+              program: programInfo,
+              level: response.data.registration?.level || formData.level,
+              semester:
+                response.data.registration?.semester || formData.semester,
+            });
             setRegistrationSuccess(true);
-            setRegistrationData(response.data);
             toast.success(response.message || "Registration successful");
           }
         } else {
           toast.error(response.message || "Registration failed");
         }
       } else {
-        // Handle error from rejected thunk
         const errorMessage = result.payload || "Failed to register courses";
         toast.error(errorMessage);
       }
@@ -284,9 +279,7 @@ const RegisterCourses = () => {
       toast.error("Registration information is missing");
       return;
     }
-
     try {
-      // Prepare payment data with all required fields
       const paymentData = {
         registrationId: registrationData.registrationId,
         amount:
@@ -298,16 +291,12 @@ const RegisterCourses = () => {
             ? "departmental_dues"
             : "school_fees"),
       };
-
       const result = await dispatch(initializePayment(paymentData));
-
       if (result.meta.requestStatus === "rejected") {
-        // Handle error from rejected thunk
         const errorMessage = result.payload || "Failed to initialize payment";
         toast.error(errorMessage);
         console.error("Payment initialization failed:", errorMessage);
       }
-      // The redirect will be handled by the useEffect hook above
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to initialize payment";
@@ -318,7 +307,7 @@ const RegisterCourses = () => {
 
   const resetForm = () => {
     setFormData({
-      program: "",
+      program: userProgramId || "", // Reset to user's program if available
       level: "",
       semester: "",
     });
@@ -327,7 +316,6 @@ const RegisterCourses = () => {
       schoolFeesReceipt: null,
       hallDuesReceipt: null,
     });
-    setSelectedCourses([]);
     setRegistrationSuccess(false);
     setRegistrationData(null);
     setShowPaymentScreen(false);
@@ -347,7 +335,7 @@ const RegisterCourses = () => {
                   Registration Successful!
                 </h2>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">
-                  You have successfully registered for your courses.
+                  You have successfully registered for the semester.
                 </p>
                 <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-left">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -369,16 +357,6 @@ const RegisterCourses = () => {
                       {registrationData.registration?.semester ||
                         registrationData.semester}
                     </p>
-                    <p>
-                      <span className="font-medium">Courses:</span>{" "}
-                      {registrationData.registration?.courses?.length ||
-                        registrationData.coursesCount}
-                    </p>
-                    <p>
-                      <span className="font-medium">Total Units:</span>{" "}
-                      {registrationData.registration?.totalUnits ||
-                        registrationData.totalUnits}
-                    </p>
                   </div>
                 </div>
                 <div className="mt-6 flex justify-center space-x-4">
@@ -389,7 +367,7 @@ const RegisterCourses = () => {
                     Back to Dashboard
                   </Button>
                   <Button variant="outline" onClick={resetForm}>
-                    Register for More Courses
+                    Register for Another Semester
                   </Button>
                 </div>
               </div>
@@ -416,7 +394,6 @@ const RegisterCourses = () => {
                 <p className="mt-2 text-gray-600 dark:text-gray-400">
                   Complete your registration by making the required payment
                 </p>
-
                 <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-left">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                     Payment Details
@@ -464,7 +441,6 @@ const RegisterCourses = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-left">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Registration Details
@@ -472,7 +448,67 @@ const RegisterCourses = () => {
                   <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <p>
                       <span className="font-medium">Program:</span>{" "}
-                      {registrationData.program.name}
+                      {(() => {
+                        // Try to get program name from various possible locations
+                        if (registrationData.registration?.program?.name) {
+                          return registrationData.registration.program.name;
+                        } else if (
+                          registrationData.data?.registration?.program?.name
+                        ) {
+                          return registrationData.data.registration.program
+                            .name;
+                        } else if (registrationData.program?.name) {
+                          return registrationData.program.name;
+                        }
+                        return "N/A";
+                      })()}
+                    </p>
+                    <p>
+                      <span className="font-medium">Department:</span>{" "}
+                      {(() => {
+                        // Try to get user's department from various possible locations
+                        let userDept = null;
+
+                        // Try from registration data
+                        if (
+                          registrationData.registration?.student?.department
+                        ) {
+                          userDept =
+                            registrationData.registration.student.department;
+                        } else if (
+                          registrationData.data?.registration?.student
+                            ?.department
+                        ) {
+                          userDept =
+                            registrationData.data.registration.student
+                              .department;
+                        } else if (
+                          registrationData.data?.registrationInfo?.student
+                            ?.department
+                        ) {
+                          userDept =
+                            registrationData.data.registrationInfo.student
+                              .department;
+                        }
+
+                        if (!userDept) return "N/A";
+
+                        // Handle if department is an array of objects
+                        if (Array.isArray(userDept)) {
+                          return userDept
+                            .map((d) => d.name || d)
+                            .filter(Boolean)
+                            .join(", ");
+                        }
+
+                        // Handle if department is an object
+                        if (typeof userDept === "object" && userDept !== null) {
+                          return userDept.name || "N/A";
+                        }
+
+                        // Handle if department is just a string
+                        return userDept;
+                      })()}
                     </p>
                     <p>
                       <span className="font-medium">Level:</span>{" "}
@@ -484,7 +520,6 @@ const RegisterCourses = () => {
                     </p>
                   </div>
                 </div>
-
                 <div className="mt-8 flex justify-center space-x-4">
                   <Button
                     onClick={handlePayment}
@@ -527,13 +562,12 @@ const RegisterCourses = () => {
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
-            Course Registration
+            Semester Registration
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Register for your courses and complete the required payments
+            Register for the semester and complete the required payments
           </p>
         </div>
-
         {/* Back to Dashboard */}
         <Button
           onClick={() => navigate("/student/dashboard")}
@@ -542,10 +576,11 @@ const RegisterCourses = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
-
         <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl">Course Registration Form</CardTitle>
+            <CardTitle className="text-xl">
+              Semester Registration Form
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -554,7 +589,6 @@ const RegisterCourses = () => {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                   Academic Information
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="program">Program</Label>
@@ -572,22 +606,32 @@ const RegisterCourses = () => {
                           placeholder={
                             programsLoading
                               ? "Loading programs..."
-                              : "Select program"
+                              : userProgramId
+                              ? "Select your program"
+                              : "No program assigned"
                           }
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {programs
-                          .filter((program) => program._id === user.program._id)
-                          .map((program) => (
-                            <SelectItem key={program._id} value={program._id}>
-                              {program.name} ({program.degree})
-                            </SelectItem>
-                          ))}
+                        {userProgramId ? (
+                          (programs || [])
+                            .filter(
+                              (program) =>
+                                program && program._id === userProgramId
+                            )
+                            .map((program) => (
+                              <SelectItem key={program._id} value={program._id}>
+                                {program.name}
+                              </SelectItem>
+                            ))
+                        ) : (
+                          <SelectItem value="no-program" disabled>
+                            No program assigned
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="level">Level</Label>
                     <Select
@@ -607,7 +651,6 @@ const RegisterCourses = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="semester">Semester</Label>
                     <Select
@@ -633,13 +676,11 @@ const RegisterCourses = () => {
                   </div>
                 </div>
               </div>
-
               {/* Document Upload */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                   Required Documents
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="courseRegistrationSlip">
@@ -675,7 +716,6 @@ const RegisterCourses = () => {
                       </div>
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="schoolFeesReceipt">
                       School Fees Receipt{" "}
@@ -713,7 +753,6 @@ const RegisterCourses = () => {
                       </div>
                     </div>
                   </div>
-
                   {formData.semester === "First Semester" && (
                     <div>
                       <Label htmlFor="hallDuesReceipt">
@@ -752,7 +791,6 @@ const RegisterCourses = () => {
                   )}
                 </div>
               </div>
-
               {/* Semester Requirements Notice */}
               <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
@@ -762,12 +800,16 @@ const RegisterCourses = () => {
                     : "Second semester requires only course registration slip. School fees receipt is optional if you have already paid."}
                 </AlertDescription>
               </Alert>
-
               {/* Submit Button */}
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  disabled={coursesLoading || availableCourses.length === 0}
+                  disabled={
+                    coursesLoading ||
+                    !formData.program ||
+                    !formData.level ||
+                    !formData.semester
+                  }
                   className="bg-emerald-600 hover:bg-emerald-700"
                 >
                   {coursesLoading ? (
@@ -778,7 +820,7 @@ const RegisterCourses = () => {
                   ) : (
                     <>
                       <FileText className="mr-2 h-4 w-4" />
-                      Register Courses
+                      Register for Semester
                     </>
                   )}
                 </Button>
@@ -790,5 +832,4 @@ const RegisterCourses = () => {
     </div>
   );
 };
-
 export default RegisterCourses;

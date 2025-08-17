@@ -174,7 +174,6 @@ export const registerCourses = async (req, res) => {
         program = parsedData.program;
         level = parsedData.level;
         semester = parsedData.semester;
-        // courseIds = parsedData.courseIds;
       } catch (e) {
         return res.status(400).json({ 
           success: false,
@@ -186,11 +185,9 @@ export const registerCourses = async (req, res) => {
       program = req.body.program;
       level = req.body.level;
       semester = req.body.semester;
-      // courseIds = req.body.courseIds;
     }
     
     const studentId = req.user._id;
-
     // Validate required fields
     if (!program || !level || !semester) {
       return res.status(400).json({ 
@@ -198,7 +195,6 @@ export const registerCourses = async (req, res) => {
         message: "Program, level and semester are required" 
       });
     }
-
     // Validate IDs
     if (!mongoose.isValidObjectId(program)) {
       return res.status(400).json({ 
@@ -206,7 +202,6 @@ export const registerCourses = async (req, res) => {
         message: "Invalid program ID" 
       });
     }
-
     // Validate program existence
     const programExists = await Program.findById(program);
     if (!programExists) {
@@ -215,7 +210,6 @@ export const registerCourses = async (req, res) => {
         message: "Invalid program ID" 
       });
     }
-
     // Validate level and semester
     if (!["100", "200", "300", "400"].includes(level)) {
       return res.status(400).json({ 
@@ -229,7 +223,6 @@ export const registerCourses = async (req, res) => {
         message: "Invalid semester" 
       });
     }
-
     // Check for existing registration
     const existingRegistration = await CourseRegistration.findOne({ 
       student: studentId, 
@@ -248,7 +241,6 @@ export const registerCourses = async (req, res) => {
       schoolFeesReceipt: null,
       hallDuesReceipt: null
     };
-
     // Course Registration Slip is mandatory for both semesters
     if (!files.courseRegistrationSlip || !Array.isArray(files.courseRegistrationSlip) || files.courseRegistrationSlip.length === 0) {
       return res.status(400).json({ 
@@ -256,7 +248,6 @@ export const registerCourses = async (req, res) => {
         message: "Course registration slip is required" 
       });
     }
-
     // Track uploaded files for potential cleanup
     const uploadedFiles = [];
     
@@ -268,7 +259,6 @@ export const registerCourses = async (req, res) => {
         'course_registration_slips'
       );
       uploadedFiles.push(uploads.courseRegistrationSlip);
-
       // Handle semester-specific requirements
       if (semester === 'First Semester') {
         // First semester requires all three documents
@@ -284,7 +274,6 @@ export const registerCourses = async (req, res) => {
             message: "Hall dues receipt is required for first semester" 
           });
         }
-
         // Upload school fees receipt
         const schoolFeesFile = files.schoolFeesReceipt[0];
         uploads.schoolFeesReceipt = await uploadFile(
@@ -293,7 +282,6 @@ export const registerCourses = async (req, res) => {
         );
         uploadedFiles.push(uploads.schoolFeesReceipt);
         uploads.schoolFeesReceipt.uploadedAt = new Date();
-
         // Upload hall dues receipt
         const hallDuesFile = files.hallDuesReceipt[0];
         uploads.hallDuesReceipt = await uploadFile(
@@ -302,22 +290,18 @@ export const registerCourses = async (req, res) => {
         );
         uploadedFiles.push(uploads.hallDuesReceipt);
         uploads.hallDuesReceipt.uploadedAt = new Date();
-
         // Create registration with pending payment status
         const registration = await CourseRegistration.create({
           student: studentId,
           program,
           level,
           semester,
-          // courses: parsedCourseIds,
           uploads,
           paymentStatus: 'pending'
         });
-
         // Generate payment reference for departmental dues
         const paymentReference = generatePaymentReference();
         const departmentalDuesAmount = 5000; // This should come from configuration
-
         // Create payment record
         const payment = await Payment.create({
           student: studentId,
@@ -329,11 +313,18 @@ export const registerCourses = async (req, res) => {
           reference: paymentReference,
           status: 'pending'
         });
-
         // Add payment to registration
         registration.payments = [payment._id]; // Changed from push to direct assignment
         await registration.save();
-
+        
+        // Get the user with populated department
+        const userWithDepartment = await User.findById(studentId)
+          .populate('department', 'name');
+        
+        // Populate the registration with program data
+        const populatedRegistration = await CourseRegistration.findById(registration._id)
+          .populate('program', 'name degree');
+        
         // Return payment required response
         return res.status(200).json({
           success: true,
@@ -349,12 +340,16 @@ export const registerCourses = async (req, res) => {
               description: `Departmental dues for ${semester} - ${level} level`
             },
             registrationInfo: {
-              student: studentId,
-              program: programExists.name,
+              student: userWithDepartment, // Use the user with populated department
+              program: programExists,
               level,
               semester,
-              // totalUnits,
-              // coursesCount: parsedCourseIds.length
+              totalUnits: 0, // Since no courses are selected
+              coursesCount: 0 // Since no courses are selected
+            },
+            registration: {
+              ...populatedRegistration.toObject(),
+              student: userWithDepartment // Override student with populated department
             }
           }
         });
@@ -370,7 +365,6 @@ export const registerCourses = async (req, res) => {
           uploadedFiles.push(uploads.schoolFeesReceipt);
           uploads.schoolFeesReceipt.uploadedAt = new Date();
         }
-
         // Determine if payment is needed based on school fees receipt
         const needsSchoolFeesPayment = !uploads.schoolFeesReceipt;
         
@@ -379,16 +373,14 @@ export const registerCourses = async (req, res) => {
           program,
           level,
           semester,
-          // courses: parsedCourseIds,
           uploads,
           paymentStatus: needsSchoolFeesPayment ? 'pending' : 'successful'
         });
-
+        
         if (needsSchoolFeesPayment) {
           // Generate payment reference for school fees
           const paymentReference = generatePaymentReference();
           const schoolFeesAmount = 25000; // This should come from configuration
-
           const payment = await Payment.create({
             student: studentId,
             registration: registration._id,
@@ -399,10 +391,17 @@ export const registerCourses = async (req, res) => {
             reference: paymentReference,
             status: 'pending'
           });
-
           registration.payments = [payment._id]; // Changed from push to direct assignment
           await registration.save();
-
+          
+          // Get the user with populated department
+          const userWithDepartment = await User.findById(studentId)
+            .populate('department', 'name');
+          
+          // Populate the registration with program data
+          const populatedRegistration = await CourseRegistration.findById(registration._id)
+            .populate('program', 'name degree');
+          
           return res.status(200).json({
             success: true,
             message: "Registration complete but school fees payment required",
@@ -417,26 +416,37 @@ export const registerCourses = async (req, res) => {
                 description: `School fees for ${semester} - ${level} level`
               },
               registrationInfo: {
-                program: programExists.name,
+                student: userWithDepartment, // Use the user with populated department
+                program: programExists,
                 level,
                 semester,
-                totalUnits,
-                coursesCount: parsedCourseIds.length
+                totalUnits: 0, // Since no courses are selected
+                coursesCount: 0 // Since no courses are selected
+              },
+              registration: {
+                ...populatedRegistration.toObject(),
+                student: userWithDepartment // Override student with populated department
               }
             }
           });
         } else {
-
+          // Get the user with populated department
+          const userWithDepartment = await User.findById(studentId)
+            .populate('department', 'name');
+          
+          // Populate the registration with program data
           const populatedRegistration = await CourseRegistration.findById(registration._id)
-            // .populate('courses', 'title code unit semester program')
-            .populate('program', 'name degree department')
-            .populate('student', 'firstName lastName studentId');
-
+            .populate('program', 'name degree');
+          
           return res.status(201).json({
             success: true,
-            message: "Courses registered successfully - no additional payment required",
+            message: "Registration successful - no additional payment required",
             data: {
-              registration: populatedRegistration,
+              registration: {
+                ...populatedRegistration.toObject(),
+                student: userWithDepartment // Override student with populated department
+              },
+              program: programExists,
               paymentRequired: false
             }
           });
@@ -498,7 +508,6 @@ export const getAvailableCourses = async (req, res) => {
 };
 
 // Student: Get own registered courses
-// Student: Get own registered courses
 export const getMyCourses = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -508,7 +517,20 @@ export const getMyCourses = async (req, res) => {
     }
     
     const registrations = await CourseRegistration.find({ student: userId })
-      .populate('program', 'name degree')
+      .populate({
+        path: 'program',
+        populate: {
+          path: 'department',
+          model: 'Department'
+        }
+      })
+      .populate({
+        path: 'student',
+        populate: {
+          path: 'department',
+          model: 'Department'
+        }
+      });
     
     // Transform uploads to documents array
     const transformedRegistrations = registrations.map((reg) => ({

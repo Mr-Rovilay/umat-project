@@ -108,11 +108,12 @@ const programSlice = createSlice({
       })
       .addCase(getAllPrograms.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.programs = action.payload;
+       state.programs = action.payload || []; // Ensure it's always an array
       })
       .addCase(getAllPrograms.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+         state.programs = [];
       })
       // Get single program
       .addCase(getProgram.pending, (state) => {

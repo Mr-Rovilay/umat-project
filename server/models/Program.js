@@ -7,11 +7,11 @@ const programSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    department: {
+    department: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Department',
       required: true,
-    },
+    }],
     duration: {
       enum: ['3 years', '4 years', '5 years'],
       type: String,
