@@ -67,8 +67,8 @@ export const initializePayment = async (req, res) => {
       email: student.email,
       amount: amount * 100, // Paystack expects amount in kobo
       reference: payment.reference,
-      callback_url: "http://localhost:5173/payment/callback",
-      //  callback_url: "https://umat-project-school.onrender.com/payment/callback",
+      // callback_url: "http://localhost:5173/payment/callback",
+       callback_url: "https://umat-project-school.onrender.com/payment/callback",
       metadata: {
            student_id: studentId.toString(),
         registration_id: registrationId,
