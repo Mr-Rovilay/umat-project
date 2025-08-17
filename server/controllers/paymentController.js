@@ -67,7 +67,8 @@ export const initializePayment = async (req, res) => {
       email: student.email,
       amount: amount * 100, // Paystack expects amount in kobo
       reference: payment.reference,
-      callback_url: `${process.env.FRONTEND_URL}/payment/callback`,
+      // callback_url: "http://localhost:5173/payment/callback",
+       callback_url: "https://umat-project-school.onrender.com/payment/callback",
       metadata: {
            student_id: studentId.toString(),
         registration_id: registrationId,
@@ -119,33 +120,57 @@ export const initializePayment = async (req, res) => {
     });
   }
 }
-
+// controllers/paymentController.js
 // Verify payment
 export const verifyPayment = async (req, res) => {
   try {
     const { reference } = req.params;
     const studentId = req.user._id;
-
+    
     if (!reference) {
       return res.status(400).json({
         success: false,
         message: 'Payment reference is required'
       });
     }
-
+    
     // Find the payment
     const payment = await Payment.findOne({
       reference,
       student: studentId
     }).populate('registration');
-
+    
     if (!payment) {
       return res.status(404).json({
         success: false,
         message: 'Payment not found'
       });
     }
-
+    
+    // If payment is already successful, return early
+    if (payment.status === 'successful') {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment already verified',
+        data: {
+          payment: {
+            id: payment._id,
+            amount: payment.amount,
+            type: payment.paymentType,
+            status: payment.status,
+            reference: payment.reference,
+            transactionId: payment.transactionId
+          },
+          registration: {
+            id: payment.registration._id,
+            paymentStatus: payment.registration.paymentStatus,
+            semester: payment.registration.semester,
+            level: payment.registration.level
+          }
+        }
+      });
+    }
+    
     // Verify with Paystack
     const response = await axios.get(
       `${PAYSTACK_BASE_URL}/transaction/verify/${reference}`,
@@ -155,13 +180,13 @@ export const verifyPayment = async (req, res) => {
         }
       }
     );
-
+    
     const { data } = response.data;
-
+    
     if (!response.data.status || data.status !== 'success') {
       payment.status = 'failed';
       await payment.save();
-
+      
       return res.status(400).json({
         success: false,
         message: 'Payment verification failed',
@@ -171,7 +196,7 @@ export const verifyPayment = async (req, res) => {
         }
       });
     }
-
+    
     // Payment successful
     payment.status = 'successful';
     payment.transactionId = data.id;
@@ -181,7 +206,7 @@ export const verifyPayment = async (req, res) => {
       verification_data: data
     };
     await payment.save();
-
+    
     // Update registration based on payment type
     const registration = payment.registration;
     
@@ -198,15 +223,16 @@ export const verifyPayment = async (req, res) => {
         registration.uploads.schoolFeesReceipt.verified = true;
       }
     }
-
+    
     await registration.save();
-
-    // Update user's courses and owing status
+    
+    // Update user's owing status
     const user = await User.findById(studentId);
-    user.courses = [...new Set([...user.courses, ...registration.courses])];
-    user.owingStatus = await checkUserOwingStatus(studentId);
-    await user.save();
-
+    if (user) {
+      user.owingStatus = await checkUserOwingStatus(studentId);
+      await user.save();
+    }
+    
     res.status(200).json({
       success: true,
       message: 'Payment verified successfully',
@@ -227,7 +253,6 @@ export const verifyPayment = async (req, res) => {
         }
       }
     });
-
   } catch (error) {
     console.error('Payment verification error:', error);
     res.status(500).json({
@@ -236,8 +261,9 @@ export const verifyPayment = async (req, res) => {
       error: error.response?.data?.message || error.message
     });
   }
-};
+}
 
+// controllers/paymentController.js
 // Paystack webhook
 export const paystackWebhook = async (req, res) => {
   try {
@@ -245,22 +271,22 @@ export const paystackWebhook = async (req, res) => {
       .createHmac('sha512', PAYSTACK_SECRET_KEY)
       .update(JSON.stringify(req.body))
       .digest('hex');
-
+      
     if (hash !== req.headers['x-paystack-signature']) {
       return res.status(400).json({
         success: false,
         message: 'Invalid signature'
       });
     }
-
+    
     const { event, data } = req.body;
-
+    
     if (event === 'charge.success') {
       const payment = await Payment.findOne({
         reference: data.reference
       }).populate('registration');
-
-      if (payment) {
+      
+      if (payment && payment.status !== 'successful') {
         payment.status = 'successful';
         payment.transactionId = data.id;
         payment.verifiedAt = new Date();
@@ -269,13 +295,21 @@ export const paystackWebhook = async (req, res) => {
           webhook_data: data
         };
         await payment.save();
-
+        
         // Update registration
         const registration = payment.registration;
         if (registration) {
           registration.paymentStatus = 'complete';
+          
+          // Verify documents based on payment type
+          if (payment.paymentType === 'departmental_dues' && registration.uploads.hallDuesReceipt) {
+            registration.uploads.hallDuesReceipt.verified = true;
+          } else if (payment.paymentType === 'school_fees' && registration.uploads.schoolFeesReceipt) {
+            registration.uploads.schoolFeesReceipt.verified = true;
+          }
+          
           await registration.save();
-
+          
           // Update user owing status
           const user = await User.findById(payment.student);
           if (user) {
@@ -285,9 +319,8 @@ export const paystackWebhook = async (req, res) => {
         }
       }
     }
-
+    
     res.status(200).json({ success: true });
-
   } catch (error) {
     console.error('Webhook error:', error);
     res.status(500).json({

@@ -121,14 +121,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/payment/callback"
-            element={
-              <ProtectedRoute role="student">
-                <PaymentCallback />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/payment/callback" element={<PaymentCallback />} />
           <Route
             path="/courses/register"
             element={

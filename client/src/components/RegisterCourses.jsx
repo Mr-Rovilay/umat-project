@@ -223,7 +223,7 @@ const RegisterCourses = () => {
               paymentDetails: response.data.data?.paymentDetails || {
                 amount:
                   response.data.data?.paymentDetails?.amount ||
-                  (formData.semester === "First Semester" ? 5000 : 25000),
+                  (formData.semester === "First Semester" ? 3 : 3.5),
                 type:
                   response.data.data?.paymentDetails?.type ||
                   (formData.semester === "First Semester"
@@ -284,7 +284,7 @@ const RegisterCourses = () => {
         registrationId: registrationData.registrationId,
         amount:
           registrationData.paymentDetails?.amount ||
-          (registrationData.semester === "First Semester" ? 5000 : 25000),
+          (registrationData.semester === "First Semester" ? 3 : 3.5),
         paymentType:
           registrationData.paymentDetails?.type ||
           (registrationData.semester === "First Semester"
@@ -419,8 +419,8 @@ const RegisterCourses = () => {
                         {(
                           registrationData.paymentDetails?.amount ||
                           (registrationData.semester === "First Semester"
-                            ? 5000
-                            : 25000)
+                            ? 3
+                            : 3.5)
                         ).toLocaleString()}
                       </span>
                     </div>
