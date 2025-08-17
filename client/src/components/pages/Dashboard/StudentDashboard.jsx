@@ -58,7 +58,7 @@ function StudentDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg text-gray-700 dark:text-gray-300">
             Loading dashboard...
           </p>
@@ -186,9 +186,6 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Bsc Programs At Main Campus TARKWA</CardTitle>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Stay updated with department news
-                    </p>
                   </div>
                 </div>
               </CardHeader>

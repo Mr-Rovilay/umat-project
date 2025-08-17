@@ -72,16 +72,8 @@ const RegisterCourses = () => {
 
   // Fetch programs on component mount
   useEffect(() => {
-    console.log("Fetching programs...");
     dispatch(getAllPrograms());
   }, [dispatch]);
-
-  // Debug logs
-  useEffect(() => {
-    console.log("User Program ID:", userProgramId);
-    console.log("Programs from Redux:", programs);
-    console.log("Programs loading:", programsLoading);
-  }, [userProgramId, programs, programsLoading]);
 
   // Set the user's program as default when programs are loaded
   useEffect(() => {
@@ -323,8 +315,8 @@ const RegisterCourses = () => {
 
   if (registrationSuccess) {
     return (
-      <div className="max-pad-container bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-pad-container mx-auto">
           <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-emerald-200 dark:border-emerald-700 shadow-lg">
             <CardContent className="pt-6">
               <div className="text-center">

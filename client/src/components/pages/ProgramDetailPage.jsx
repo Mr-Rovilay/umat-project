@@ -25,7 +25,6 @@ const ProgramDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { programs, isLoading, error } = useSelector((state) => state.programs);
-  console.log(programs)
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const ProgramDetailPage = () => {
   const LoadingSpinner = () => (
     <div className="flex flex-col items-center justify-center py-20">
       <div className="relative">
-        <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
         <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-teal-600 rounded-full animate-spin animate-reverse"></div>
       </div>
       <p className="mt-4 text-gray-600 dark:text-gray-400 animate-pulse">Loading program details...</p>

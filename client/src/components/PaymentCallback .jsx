@@ -24,11 +24,9 @@ const PaymentCallback = () => {
     setReference(paymentReference);
     
     if (paymentReference) {
-      console.log('Verifying payment with reference:', paymentReference);
       dispatch(verifyPayment(paymentReference))
         .unwrap()
         .then((result) => {
-          console.log('Verification successful:', result);
           setVerificationStatus('success');
         })
         .catch((err) => {
@@ -45,7 +43,7 @@ const PaymentCallback = () => {
     if (verificationStatus === 'success') {
       // After verification is complete, redirect to dashboard
       const timer = setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/student/dashboard');
       }, 3000);
       
       return () => clearTimeout(timer);
@@ -53,7 +51,7 @@ const PaymentCallback = () => {
   }, [verificationStatus, navigate]);
   
   const handleGoToDashboard = () => {
-    navigate('/dashboard');
+    navigate('/student/dashboard');
   };
   
   return (
@@ -107,7 +105,7 @@ const PaymentCallback = () => {
                 {paymentVerification && (
                   <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-left">
                     <p className="text-sm font-medium">Payment Details:</p>
-                    <p className="text-sm">Amount: {paymentVerification.payment?.amount}</p>
+                    <p className="text-sm">Amount: GH₵ {paymentVerification.payment?.amount}</p>
                     <p className="text-sm">Type: {paymentVerification.payment?.type}</p>
                     <p className="text-sm">Reference: {paymentVerification.payment?.reference}</p>
                   </div>

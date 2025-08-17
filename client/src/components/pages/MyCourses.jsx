@@ -23,13 +23,14 @@ import {
   Clock,
   DollarSign,
   FileText,
+  Upload,
 } from "lucide-react";
 import { clearError, fetchMyCourses } from "@/redux/slice/courseSlice";
 import PDFViewer from "../PDFViewer";
 
 function MyCourses() {
   const dispatch = useDispatch();
-  const { myCourses, isLoading, error, owingStatus, payments } = useSelector(
+  const { myCourses, isLoading, error } = useSelector(
     (state) => state.courses
   );
 
@@ -52,8 +53,8 @@ function MyCourses() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-700 dark:text-gray-300">
+          <Loader2 className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="">
             Loading your slips...
           </p>
         </div>
@@ -76,30 +77,6 @@ function MyCourses() {
             View your register slips and payment status for the current semester
           </p>
         </div>
-
-        {/* Owing Status and Register Button */}
-        <div className="mb-8">
-          <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg">
-            <CardContent className="flex flex-col md:flex-row items-center justify-between py-6">
-              <div className="flex items-center gap-3">
-                <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Owing Status:{" "}
-                  {owingStatus === undefined || owingStatus ? (
-                    <span className="text-red-600 dark:text-red-400">
-                      Pending Payment
-                    </span>
-                  ) : (
-                    <span className="text-green-600 dark:text-green-400">
-                      Cleared
-                    </span>
-                  )}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Error Alert */}
         {error && (
           <Alert
@@ -119,6 +96,29 @@ function MyCourses() {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* No Slips Message */}
+        {!isLoading && !error && myCourses.length === 0 && (
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg mb-8">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="mb-4 p-4 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+                <Upload className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No Registration Slips Found
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                You haven't uploaded any registration slips yet. Upload your course registration slip and payment receipts to get started.
+              </p>
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                <Link to="/course/register">
+                  Upload Slips Now
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="space-y-6">
           {myCourses.map((registration) => (
             <Card

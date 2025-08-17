@@ -156,7 +156,7 @@ const PaymentHistory = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                <span className="font-medium">₦{selectedPayment.amount?.toLocaleString()}</span>
+                <span className="font-medium">GH₵ {selectedPayment.amount?.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Payment Type:</span>
@@ -404,7 +404,7 @@ const PaymentHistory = () => {
                             {getPaymentTypeDisplay(payment.paymentType)}
                           </td>
                           <td className="py-4 px-4 text-sm text-gray-700 dark:text-gray-300">
-                            ₦{payment.amount?.toLocaleString()}
+                            GH₵ {payment.amount?.toLocaleString()}
                           </td>
                           <td className="py-4 px-4 text-sm text-gray-700 dark:text-gray-300">
                             {payment.semester}

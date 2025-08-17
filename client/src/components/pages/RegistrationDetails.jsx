@@ -384,7 +384,7 @@ const getDepartmentNames = (departments) => {
                         <div className="flex justify-between">
                           <span className="text-gray-500 dark:text-gray-400">Amount:</span>
                           <span className="font-medium">
-                            ₦{registrationDetails.payments[0].amount?.toLocaleString()}
+                            GH₵ {registrationDetails.payments[0].amount?.toLocaleString()}
                           </span>
                         </div>
                         <div className="flex justify-between">
