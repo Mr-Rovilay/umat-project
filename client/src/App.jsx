@@ -60,7 +60,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-                    <Route
+          <Route
             path="/student/clubs"
             element={
               <ProtectedRoute role="student">
@@ -70,7 +70,7 @@ function App() {
           />
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/programs/:id" element={<ProgramDetailPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
           <Route path="/news" element={<News />} />
@@ -115,8 +115,8 @@ function App() {
             }
           />
           <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsOfUse />} />
-        <Route path="/accessibility" element={<Accessibility />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/accessibility" element={<Accessibility />} />
           <Route
             path="/payments/verify/:reference"
             element={
