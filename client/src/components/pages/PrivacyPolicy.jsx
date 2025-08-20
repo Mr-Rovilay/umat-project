@@ -1,16 +1,15 @@
 // components/pages/PrivacyPolicy.jsx
 import React from 'react';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Shield, Lock, Database, Eye, Mail, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PrivacyPolicy = () => {
   return (
-    <HelmetProvider>
-      <Helmet>
+    <>
+      <div>
         <title>Privacy Policy | Student Portal</title>
         <meta name="description" content="Privacy Policy for Student Portal - Learn how we collect, use, and protect your personal information." />
-      </Helmet>
+      </div>
       
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
@@ -175,7 +174,7 @@ const PrivacyPolicy = () => {
           </div>
         </div>
       </div>
-    </HelmetProvider>
+    </>
   );
 };
 
