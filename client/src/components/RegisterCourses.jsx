@@ -24,6 +24,7 @@ import {
   CheckCircle,
   ArrowLeft,
   Loader2,
+  TriangleAlert,
 } from "lucide-react";
 // Redux actions
 import { getAllPrograms } from "@/redux/slice/programSlice";
@@ -42,7 +43,6 @@ const RegisterCourses = () => {
     (state) => state.programs
   );
   const {
-    availableCourses,
     isLoading: coursesLoading,
     error,
   } = useSelector((state) => state.courses);
@@ -66,15 +66,12 @@ const RegisterCourses = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationData, setRegistrationData] = useState(null);
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
-
   // Get user's program ID - handle both cases where program might be an object or just an ID
   const userProgramId = user?.program?._id || user?.program;
-
   // Fetch programs on component mount
   useEffect(() => {
     dispatch(getAllPrograms());
   }, [dispatch]);
-
   // Set the user's program as default when programs are loaded
   useEffect(() => {
     if (programs.length > 0 && userProgramId && !formData.program) {
@@ -87,7 +84,6 @@ const RegisterCourses = () => {
       }
     }
   }, [programs, userProgramId, formData.program]);
-
   // Fetch available courses when program, level, or semester changes
   useEffect(() => {
     if (formData.program && formData.level && formData.semester) {
@@ -100,7 +96,6 @@ const RegisterCourses = () => {
       );
     }
   }, [formData, dispatch]);
-
   // Handle errors from Redux
   useEffect(() => {
     if (error) {
@@ -108,7 +103,6 @@ const RegisterCourses = () => {
       dispatch(clearError());
     }
   }, [error, dispatch]);
-
   // Handle payment errors
   useEffect(() => {
     if (paymentError) {
@@ -116,7 +110,6 @@ const RegisterCourses = () => {
       dispatch(clearError());
     }
   }, [paymentError, dispatch]);
-
   // Handle payment initialization success
   useEffect(() => {
     if (paymentDetails && paymentDetails.authorization_url) {
@@ -124,7 +117,6 @@ const RegisterCourses = () => {
       window.location.href = paymentDetails.authorization_url;
     }
   }, [paymentDetails]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -132,7 +124,6 @@ const RegisterCourses = () => {
       [name]: value,
     }));
   };
-
   const handleFileChange = (e) => {
     const { name, files: fileList } = e.target;
     if (fileList && fileList[0]) {
@@ -142,7 +133,6 @@ const RegisterCourses = () => {
       }));
     }
   };
-
   const validateForm = () => {
     if (!formData.program || !formData.level || !formData.semester) {
       toast.error("Please select program, level, and semester");
@@ -163,7 +153,6 @@ const RegisterCourses = () => {
     }
     return true;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -196,13 +185,11 @@ const RegisterCourses = () => {
               );
               return;
             }
-
             // Get the program object from the response
             const programInfo =
               response.data.data?.registrationInfo?.program ||
               response.data.registration?.program ||
               response.data.program;
-
             setRegistrationData({
               registrationId: registrationId,
               program: programInfo,
@@ -240,7 +227,6 @@ const RegisterCourses = () => {
             // Get the program object from the response
             const programInfo =
               response.data.registration?.program || response.data.program;
-
             setRegistrationData({
               registration: response.data.registration,
               program: programInfo,
@@ -265,7 +251,6 @@ const RegisterCourses = () => {
       console.error("Registration error:", error);
     }
   };
-
   const handlePayment = async () => {
     if (!registrationData || !registrationData.registrationId) {
       toast.error("Registration information is missing");
@@ -296,7 +281,6 @@ const RegisterCourses = () => {
       console.error("Payment initialization error:", error);
     }
   };
-
   const resetForm = () => {
     setFormData({
       program: userProgramId || "", // Reset to user's program if available
@@ -312,7 +296,6 @@ const RegisterCourses = () => {
     setRegistrationData(null);
     setShowPaymentScreen(false);
   };
-
   if (registrationSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -351,7 +334,7 @@ const RegisterCourses = () => {
                     </p>
                   </div>
                 </div>
-                <div className="mt-6 flex justify-center space-x-4">
+                <div className="mt-6 grid gap-5 md:flex justify-center space-x-4">
                   <Button
                     onClick={() => navigate("/student/dashboard")}
                     className="bg-emerald-600 hover:bg-emerald-700"
@@ -369,7 +352,6 @@ const RegisterCourses = () => {
       </div>
     );
   }
-
   if (showPaymentScreen && registrationData) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -460,7 +442,6 @@ const RegisterCourses = () => {
                       {(() => {
                         // Try to get user's department from various possible locations
                         let userDept = null;
-
                         // Try from registration data
                         if (
                           registrationData.registration?.student?.department
@@ -482,9 +463,7 @@ const RegisterCourses = () => {
                             registrationData.data.registrationInfo.student
                               .department;
                         }
-
                         if (!userDept) return "N/A";
-
                         // Handle if department is an array of objects
                         if (Array.isArray(userDept)) {
                           return userDept
@@ -492,12 +471,10 @@ const RegisterCourses = () => {
                             .filter(Boolean)
                             .join(", ");
                         }
-
                         // Handle if department is an object
                         if (typeof userDept === "object" && userDept !== null) {
                           return userDept.name || "N/A";
                         }
-
                         // Handle if department is just a string
                         return userDept;
                       })()}
@@ -544,10 +521,9 @@ const RegisterCourses = () => {
       </div>
     );
   }
-
   return (
-    <div className="max-pad-container bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-pad-container mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg mb-6">
@@ -581,9 +557,9 @@ const RegisterCourses = () => {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                   Academic Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <Label htmlFor="program">Program</Label>
+                    <Label htmlFor="program" className={"pb-1"}>Program</Label>
                     <Select
                       value={formData.program}
                       onValueChange={(value) =>
@@ -593,7 +569,7 @@ const RegisterCourses = () => {
                       }
                       disabled={programsLoading}
                     >
-                      <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700">
+                      <SelectTrigger className="bg-white/50 dark:bg-gray-900/50 border-emerald-200 dark:border-emerald-700 truncate w-70">
                         <SelectValue
                           placeholder={
                             programsLoading
@@ -625,7 +601,7 @@ const RegisterCourses = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="level">Level</Label>
+                    <Label htmlFor="level" className={"pb-1"}>Level</Label>
                     <Select
                       value={formData.level}
                       onValueChange={(value) =>
@@ -644,7 +620,7 @@ const RegisterCourses = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="semester">Semester</Label>
+                    <Label htmlFor="semester" className={"pb-1"}>Semester</Label>
                     <Select
                       value={formData.semester}
                       onValueChange={(value) =>
@@ -668,6 +644,16 @@ const RegisterCourses = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Warning Alert */}
+              <Alert className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/20 dark:border-amber-800">
+                <TriangleAlert className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  <strong>Important:</strong> Please check and review your selection carefully before submitting. 
+                  Level and semester selections cannot be undone after submission.
+                </AlertDescription>
+              </Alert>
+              
               {/* Document Upload */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">

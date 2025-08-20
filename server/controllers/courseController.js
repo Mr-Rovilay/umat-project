@@ -455,7 +455,7 @@ export const registerCourses = async (req, res) => {
           level,
           semester,
           uploads,
-          paymentStatus: needsSchoolFeesPayment ? "pending" : "successful",
+          paymentStatus: needsSchoolFeesPayment ? "pending" : "complete",
         });
 
         if (needsSchoolFeesPayment) {
@@ -764,5 +764,183 @@ export const deleteCourse = async (req, res) => {
   } catch (error) {
     console.error("Delete Course Error:", error);
     res.status(500).json({ message: "Server error while deleting course" });
+  }
+};
+
+// controllers/courseController.js
+
+// Check if registration is within grace period
+export const checkGracePeriod = async (req, res) => {
+  try {
+    const { registrationId } = req.params;
+    const studentId = req.user._id;
+    
+    // Find the registration
+    const registration = await CourseRegistration.findOne({
+      _id: registrationId,
+      student: studentId
+    });
+    
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: 'Registration not found'
+      });
+    }
+    
+    // Check if current date is within grace period
+    const now = new Date();
+    const isWithinGracePeriod = now <= registration.gracePeriodEnd;
+    
+    res.status(200).json({
+      success: true,
+      isWithinGracePeriod,
+      gracePeriodEnd: registration.gracePeriodEnd,
+      daysRemaining: isWithinGracePeriod 
+        ? Math.ceil((registration.gracePeriodEnd - now) / (1000 * 60 * 60 * 24))
+        : 0
+    });
+  } catch (error) {
+    console.error('Check grace period error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking grace period',
+      error: error.message
+    });
+  }
+};
+
+// Update registration documents
+export const updateRegistrationDocuments = async (req, res) => {
+  try {
+    const files = req.files || {};
+    const { registrationId } = req.params;
+    const studentId = req.user._id;
+    
+    // Find the registration
+    const registration = await CourseRegistration.findOne({
+      _id: registrationId,
+      student: studentId
+    });
+    
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: 'Registration not found'
+      });
+    }
+    
+    // Check if within grace period
+    const now = new Date();
+    if (now > registration.gracePeriodEnd) {
+      return res.status(400).json({
+        success: false,
+        message: 'Grace period has expired. Cannot update registration documents.'
+      });
+    }
+    
+    // Track uploaded files for potential cleanup
+    const uploadedFiles = [];
+    const oldPublicIds = [];
+    
+    try {
+      // Prepare updates object
+      const updates = {};
+      
+      // Handle course registration slip update
+      if (files.courseRegistrationSlip && files.courseRegistrationSlip.length > 0) {
+        // Store old public ID for deletion
+        if (registration.uploads.courseRegistrationSlip?.publicId) {
+          oldPublicIds.push(registration.uploads.courseRegistrationSlip.publicId);
+        }
+        
+        // Upload new file
+        updates['uploads.courseRegistrationSlip'] = await uploadFile(
+          files.courseRegistrationSlip[0],
+          "course_registration_slips"
+        );
+        uploadedFiles.push(updates['uploads.courseRegistrationSlip']);
+      }
+      
+      // Handle school fees receipt update
+      if (files.schoolFeesReceipt && files.schoolFeesReceipt.length > 0) {
+        // Store old public ID for deletion
+        if (registration.uploads.schoolFeesReceipt?.publicId) {
+          oldPublicIds.push(registration.uploads.schoolFeesReceipt.publicId);
+        }
+        
+        // Upload new file
+        updates['uploads.schoolFeesReceipt'] = await uploadFile(
+          files.schoolFeesReceipt[0],
+          "school_fees_receipts"
+        );
+        uploadedFiles.push(updates['uploads.schoolFeesReceipt']);
+      }
+      
+      // Handle hall dues receipt update
+      if (files.hallDuesReceipt && files.hallDuesReceipt.length > 0) {
+        // Store old public ID for deletion
+        if (registration.uploads.hallDuesReceipt?.publicId) {
+          oldPublicIds.push(registration.uploads.hallDuesReceipt.publicId);
+        }
+        
+        // Upload new file
+        updates['uploads.hallDuesReceipt'] = await uploadFile(
+          files.hallDuesReceipt[0],
+          "hall_dues_receipts"
+        );
+        uploadedFiles.push(updates['uploads.hallDuesReceipt']);
+      }
+      
+      // Check if any updates were made
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No files provided for update'
+        });
+      }
+      
+      // Update registration
+      const updatedRegistration = await CourseRegistration.findByIdAndUpdate(
+        registrationId,
+        updates,
+        { new: true }
+      ).populate('program', 'name degree');
+      
+      // Delete old files from Cloudinary
+      for (const publicId of oldPublicIds) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cleanupError) {
+          console.error('Error deleting old file:', cleanupError);
+        }
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Registration documents updated successfully',
+        registration: updatedRegistration
+      });
+      
+    } catch (uploadError) {
+      // Clean up uploaded files if update fails
+      for (const file of uploadedFiles) {
+        try {
+          if (file.publicId) {
+            await cloudinary.uploader.destroy(file.publicId);
+          }
+        } catch (cleanupError) {
+          console.error('Error cleaning up uploaded file:', cleanupError);
+        }
+      }
+      throw uploadError;
+    }
+  } catch (error) {
+    console.error('Update registration documents error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating registration documents',
+      error: error.message
+    });
   }
 };

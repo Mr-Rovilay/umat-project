@@ -104,6 +104,36 @@ export const deleteCourse = createAsyncThunk(
   }
 );
 
+// Check grace period
+export const checkGracePeriod = createAsyncThunk(
+  'courses/checkGracePeriod',
+  async (registrationId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/courses/grace-period/${registrationId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to check grace period');
+    }
+  }
+);
+
+// Update registration documents
+export const updateRegistrationDocuments = createAsyncThunk(
+  'courses/updateRegistrationDocuments',
+  async ({ registrationId, formData }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/api/courses/update-documents/${registrationId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update registration documents');
+    }
+  }
+);
+
 export const selectTotalEnrolledCourses = (state) => 
   state.courses.myCourses.reduce(
     (total, reg) => total + (reg?.courses?.length || 0), 
@@ -118,6 +148,11 @@ const courseSlice = createSlice({
     isLoading: false,
     creationStatus: null, // Added for tracking creation
     error: null,
+      gracePeriod: {
+      isWithinGracePeriod: false,
+      gracePeriodEnd: null,
+      daysRemaining: 0,
+    },
   },
   reducers: {
     clearError: (state) => {
@@ -207,7 +242,44 @@ const courseSlice = createSlice({
       .addCase(deleteCourse.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })          
+    // Check grace period
+    .addCase(checkGracePeriod.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    })
+    .addCase(checkGracePeriod.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.gracePeriod = {
+        isWithinGracePeriod: action.payload.isWithinGracePeriod,
+        gracePeriodEnd: action.payload.gracePeriodEnd,
+        daysRemaining: action.payload.daysRemaining,
+      };
+    })
+    .addCase(checkGracePeriod.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    })
+    
+    // Update registration documents
+    .addCase(updateRegistrationDocuments.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    })
+    .addCase(updateRegistrationDocuments.fulfilled, (state, action) => {
+      state.isLoading = false;
+      // Update the registration in myCourses array
+      const index = state.myCourses.findIndex(
+        reg => reg._id === action.payload.registration._id
+      );
+      if (index !== -1) {
+        state.myCourses[index] = action.payload.registration;
+      }
+    })
+    .addCase(updateRegistrationDocuments.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    })
   },
 });
 

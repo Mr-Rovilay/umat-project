@@ -24,7 +24,13 @@ import { getProgram, clearError } from '@/redux/slice/programSlice';
 const ProgramDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { programs, isLoading, error } = useSelector((state) => state.programs);
+  // Access the Redux state correctly
+  const { currentProgram, programs, isLoading, error } = useSelector((state) => state.programs);
+  
+  console.log("Current Program:", currentProgram);
+  console.log("All Programs:", programs);
+  console.log("ID:", id);
+  
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -48,7 +54,6 @@ const ProgramDetailPage = () => {
     <div className="flex flex-col items-center justify-center py-20">
       <div className="relative">
         <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
-        <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-teal-600 rounded-full animate-spin animate-reverse"></div>
       </div>
       <p className="mt-4 text-gray-600 dark:text-gray-400 animate-pulse">Loading program details...</p>
     </div>
@@ -112,7 +117,7 @@ const ProgramDetailPage = () => {
   );
 
   // Calculate total admins across all departments
-  const totalAdmins = programs?.department?.reduce((count, dept) => count + (dept.admins?.length || 0), 0) || 0;
+  const totalAdmins = currentProgram?.department?.reduce((count, dept) => count + (dept.admins?.length || 0), 0) || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -150,7 +155,7 @@ const ProgramDetailPage = () => {
               </div>
               <p className="text-red-600 text-lg font-medium">{error}</p>
             </div>
-          ) : programs ? (
+          ) : currentProgram ? (
             <>
               {/* Header Section */}
               <div className={`text-center mb-12 transform transition-all duration-1000 ${
@@ -160,16 +165,16 @@ const ProgramDetailPage = () => {
                   <GraduationCap className="w-8 h-8 text-white" />
                 </div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-                  {programs.name}
+                  {currentProgram.name}
                 </h1>
                 <div className="flex justify-center space-x-6 text-gray-600 dark:text-gray-400">
                   <div className="flex items-center">
                     <Clock className="w-5 h-5 mr-2 text-emerald-500" />
-                    <span>{programs.duration}</span>
+                    <span>{currentProgram.duration}</span>
                   </div>
                   <div className="flex items-center">
                     <Award className="w-5 h-5 mr-2 text-teal-500" />
-                    <span>{programs.degree}</span>
+                    <span>{currentProgram.degree}</span>
                   </div>
                 </div>
               </div>
@@ -186,21 +191,21 @@ const ProgramDetailPage = () => {
                         <GraduationCap className="w-5 h-5 text-emerald-500 mr-3" />
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Degree</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{programs.degree}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{currentProgram.degree}</p>
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Clock className="w-5 h-5 text-teal-500 mr-3" />
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Duration</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{programs.duration}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{currentProgram.duration}</p>
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Calendar className="w-5 h-5 text-cyan-500 mr-3" />
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Established</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{formatDate(programs.createdAt)}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formatDate(currentProgram.createdAt)}</p>
                         </div>
                       </div>
                     </div>
@@ -213,7 +218,7 @@ const ProgramDetailPage = () => {
                         <Building className="w-5 h-5 text-emerald-500 mr-3" />
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{programs.department?.length || 0}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{currentProgram.department?.length || 0}</p>
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -236,13 +241,13 @@ const ProgramDetailPage = () => {
                   <Building className="w-6 h-6 text-emerald-500 mr-2" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Departments</h2>
                   <Badge variant="outline" className="ml-3">
-                    {programs.department?.length || 0}
+                    {currentProgram.department?.length || 0}
                   </Badge>
                 </div>
                 
-                {programs.department && programs.department.length > 0 ? (
+                {currentProgram.department && currentProgram.department.length > 0 ? (
                   <div className="space-y-8">
-                    {programs.department.map((dept) => (
+                    {currentProgram.department.map((dept) => (
                       <DepartmentSection key={dept._id} department={dept} />
                     ))}
                   </div>

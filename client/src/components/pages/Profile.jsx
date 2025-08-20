@@ -30,7 +30,7 @@ import { clearError, getUser, updateUser, changePassword,logoutUser } from '@/re
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isLoading, error } = useSelector((state) => state.auth);
+  const { user, error } = useSelector((state) => state.auth);
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const [changePasswordForm, setChangePasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [updateProfileForm, setUpdateProfileForm] = useState({ email: '', phone: '' });
@@ -65,7 +65,7 @@ function Profile() {
       } else {
         toast.error(result.payload || 'Failed to change password');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setIsSubmitting(false);
@@ -83,7 +83,7 @@ function Profile() {
       } else {
         toast.error(result.payload || 'Failed to update profile');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setIsSubmitting(false);
@@ -99,7 +99,7 @@ function Profile() {
       } else {
         toast.error(result.payload || 'Failed to logout');
       }
-    } catch (error) {
+    } catch  {
       toast.error('An error occurred');
     }
   };

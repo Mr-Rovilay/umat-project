@@ -102,7 +102,16 @@ const courseRegistrationSchema = new mongoose.Schema({
   lastUpdated: {
     type: Date,
     default: Date.now
-  }
+  },
+    gracePeriodEnd: {
+    type: Date,
+    default: function() {
+      // Set grace period to 7 days from creation
+      const gracePeriod = new Date();
+      gracePeriod.setDate(gracePeriod.getDate() + 7);
+      return gracePeriod;
+    }
+  },
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

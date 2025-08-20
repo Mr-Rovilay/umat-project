@@ -7,7 +7,9 @@ import {
   getAvailableCourses,
   registerCourses,
   updateCourse,
-  deleteCourse
+  deleteCourse,
+  updateRegistrationDocuments,
+  checkGracePeriod
 } from '../controllers/courseController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { restrictTo } from '../middleware/roleMiddleware.js';
@@ -47,5 +49,19 @@ router.put('/:id', protect, restrictTo('admin'), updateCourse);
 router.delete('/:id', protect, restrictTo('admin'), deleteCourse);
 router.get('/available', getAvailableCourses);
 router.get('/my-courses', protect, restrictTo('student'), getMyCourses);
+
+router.get('/grace-period/:registrationId', protect, restrictTo('student'), checkGracePeriod);
+
+// Update registration documents route
+router.put('/update-documents/:registrationId', 
+  protect, 
+  restrictTo('student'), 
+  upload.fields([
+    { name: 'courseRegistrationSlip', maxCount: 1 },
+    { name: 'schoolFeesReceipt', maxCount: 1 },
+    { name: 'hallDuesReceipt', maxCount: 1 }
+  ]), 
+  updateRegistrationDocuments
+);
 
 export default router;
