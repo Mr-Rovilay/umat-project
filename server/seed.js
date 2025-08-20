@@ -68,6 +68,28 @@ const seedAdmins = async () => {
         role: 'admin',
         secretKey: await bcrypt.hash('ADMINSECRET12', 10),
         department: ['689b0d4097f4407c07fd8acd'],
+      },
+
+          {
+        firstName: 'Yaw',
+        lastName: 'Adjei',
+        referenceNumber: 'ADMIN6',
+        email: 'admin6@example.com',
+        password: await bcrypt.hash('password123', 10),
+        role: 'admin',
+        secretKey: await bcrypt.hash('ADMINSECRET12', 10),
+        department: ['68a0f0c43192ba549037ce32'],
+      },
+
+          {
+        firstName: 'Kweku',
+        lastName: 'Addo',
+        referenceNumber: 'ADMIN7',
+        email: 'admin7@example.com',
+        password: await bcrypt.hash('password123', 10),
+        role: 'admin',
+        secretKey: await bcrypt.hash('ADMINSECRET12', 10),
+        department: ['68a0f1a13192ba549037ce33'],
       }
     ];
 
@@ -76,11 +98,13 @@ const seedAdmins = async () => {
 
     // Create a mapping of department IDs to admin IDs
 const departmentAdminMap = {
-  '6899ebc1693e0d4bed3d9f9e': [createdAdmins[0]._id], // Admin One
-  '689b0c3197f4407c07fd8ac0': [createdAdmins[1]._id], // Admin3
-  '689b0d1497f4407c07fd8acb': [createdAdmins[2]._id], // Admin1
-  '689b0d2897f4407c07fd8acc': [createdAdmins[3]._id], // Admin2
-  '689b0d4097f4407c07fd8acd': [createdAdmins[4]._id], // Admin2
+  '6899ebc1693e0d4bed3d9f9e': [createdAdmins[0]._id],
+  '689b0c3197f4407c07fd8ac0': [createdAdmins[1]._id],
+  '689b0d1497f4407c07fd8acb': [createdAdmins[2]._id],
+  '689b0d2897f4407c07fd8acc': [createdAdmins[3]._id],
+  '689b0d4097f4407c07fd8acd': [createdAdmins[4]._id],
+  '68a0f0c43192ba549037ce32': [createdAdmins[5]._id],
+  '68a0f1a13192ba549037ce33': [createdAdmins[6]._id],
 };
 
 

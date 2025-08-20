@@ -3,7 +3,7 @@ import React from 'react'
 const NewsEventsSection = () => {
   const newsItems = [
     { 
-      title: "UMat Wins Best Engineering University Award", 
+      title: "UMaT Wins Best Engineering University Award", 
       date: "May 15, 2023", 
       excerpt: "Recognized for excellence in engineering education and research innovation.",
       image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -30,7 +30,7 @@ const NewsEventsSection = () => {
             News & <span className="text-emerald-600">Events</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Stay updated with the latest happenings at UMat and upcoming events.
+            Stay updated with the latest happenings at UMaT and upcoming events.
           </p>
         </div>
         

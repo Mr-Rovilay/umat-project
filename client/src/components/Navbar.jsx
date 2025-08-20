@@ -92,7 +92,7 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-white tracking-tight">
-                UMat
+                UMaT
               </span>
               <span className="text-xs text-green-100 font-medium tracking-wide hidden sm:block">
                 Knowledge | Truth | Excellence
@@ -243,7 +243,7 @@ const Navbar = () => {
                       className="h-6 w-6"
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold">UMat</span>
+                      <span className="text-sm font-semibold">UMaT</span>
                       <span className="text-xs text-gray-500">Knowledge | Truth | Excellence</span>
                     </div>
                   </div>
