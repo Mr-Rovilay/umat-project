@@ -4,13 +4,15 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  GraduationCap, 
-  BookOpen, 
-  CreditCard, 
-  Newspaper, 
-  AlertCircle, 
-  DollarSign 
+import {
+  GraduationCap,
+  BookOpen,
+  CreditCard,
+  Newspaper,
+  AlertCircle,
+  DollarSign,
+  Club,
+  ClubIcon,
 } from "lucide-react";
 import { getAllDepartments } from "@/redux/slice/departmentSlice";
 import { toast } from "sonner";
@@ -18,17 +20,14 @@ import { toast } from "sonner";
 function StudentDashboard() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth || { user: null });
-  const { isLoading, error } = useSelector((state) => state.courses || { isLoading: false, error: null });
-  const { departments, isLoading: departmentsLoading, error: departmentsError } = useSelector(
-    (state) => state.departments || { departments: [], isLoading: false, error: null }
+  const { isLoading, error } = useSelector(
+    (state) => state.courses || { isLoading: false, error: null }
   );
-  
-  // Mock owing status (replace with actual data from Redux or backend)
-  const owingStatus = useSelector((state) => state.student?.owingStatus || {
-    schoolFees: 0,
-    departmentalDues: 0,
-    hasOutstanding: false
-  });
+  const { isLoading: departmentsLoading, error: departmentsError } =
+    useSelector(
+      (state) =>
+        state.departments || { departments: [], isLoading: false, error: null }
+    );
 
   useEffect(() => {
     dispatch(getAllDepartments()).then((result) => {
@@ -46,13 +45,6 @@ function StudentDashboard() {
       toast.error(departmentsError);
     }
   }, [error, departmentsError]);
-
-  const userDepartmentNames = useMemo(() => {
-    if (!user?.department?.length || !departments.length) return [];
-    return user.department
-      .map((deptId) => departments.find((d) => d._id === deptId)?.name || "Unknown Department")
-      .filter(Boolean);
-  }, [user, departments]);
 
   if (isLoading || departmentsLoading) {
     return (
@@ -77,7 +69,9 @@ function StudentDashboard() {
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Error loading dashboard
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">{error || departmentsError}</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {error || departmentsError}
+          </p>
         </div>
       </div>
     );
@@ -89,7 +83,10 @@ function StudentDashboard() {
         {/* Header Section */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center p-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full shadow-xl mb-4">
-            <GraduationCap className="w-10 h-10 text-white" aria-hidden="true" />
+            <GraduationCap
+              className="w-10 h-10 text-white"
+              aria-hidden="true"
+            />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3">
             Student Dashboard
@@ -116,7 +113,9 @@ function StudentDashboard() {
                     <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">My Slip Registration</CardTitle>
+                    <CardTitle className="text-lg">
+                      My Slip Registration
+                    </CardTitle>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       View your registered courses
                     </p>
@@ -177,7 +176,7 @@ function StudentDashboard() {
             </Card>
           </Link>
 
-                   <Link to="/programs">
+          <Link to="/programs">
             <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
               <CardHeader>
                 <div className="flex items-center space-x-3">
@@ -185,7 +184,28 @@ function StudentDashboard() {
                     <Newspaper className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Bsc Programs At Main Campus TARKWA</CardTitle>
+                    <CardTitle className="text-lg">
+                      Bsc Programs At Main Campus TARKWA
+                    </CardTitle>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link to="/student/clubs">
+            <Card className="border-emerald-200 dark:border-emerald-800 shadow-md hover:shadow-lg transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.02]">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <ClubIcon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Student Clubs</CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Join vibrant student clubs to connect, collaborate, and
+                      engage in exciting activities tailored to your interests.
+                    </p>
                   </div>
                 </div>
               </CardHeader>

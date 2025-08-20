@@ -26,6 +26,9 @@ import ProgramDetailPage from "./components/pages/ProgramDetailPage";
 import PrivacyPolicy from "./components/pages/PrivacyPolicy";
 import TermsOfUse from "./components/pages/TermsOfUse";
 import Accessibility from "./components/pages/Accessibility";
+import ClubsPage from "./components/pages/ClubsPage";
+import ForgotPassword from "./components/pages/ForgotPassword";
+import ResetPassword from "./components/pages/ResetPassword";
 
 function App() {
   useEffect(() => {
@@ -57,6 +60,17 @@ function App() {
               </ProtectedRoute>
             }
           />
+                    <Route
+            path="/student/clubs"
+            element={
+              <ProtectedRoute role="student">
+                <ClubsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/programs/:id" element={<ProgramDetailPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
           <Route path="/news" element={<News />} />

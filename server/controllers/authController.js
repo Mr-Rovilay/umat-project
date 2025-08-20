@@ -1,7 +1,9 @@
 // controllers/authController.js
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import crypto from 'crypto';
 import { generateToken } from '../utils/generateToken.js';
+import { sendPasswordResetEmail } from '../utils/email.js';
 
 export const registerStudent = async (req, res) => {
   try {
@@ -220,5 +222,104 @@ export const changePassword = async (req, res) => {
   } catch (error) {
     console.error('Change Password Error:', error);
     res.status(500).json({ message: 'Server error while changing password' });
+  }
+};
+
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'No user found with that email address' });
+    }
+    
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = Date.now() + 30 * 60 * 1000; // 30 minutes
+    
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiry = resetTokenExpiry;
+    await user.save({ validateBeforeSave: false });
+    
+    // Create reset URL
+    // const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetUrl = `https://umat-project-school.onrender.com/reset-password/${resetToken}`;
+    
+    try {
+      await sendPasswordResetEmail(user.email, user.firstName, resetUrl);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Password reset email sent'
+      });
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      
+      // If email fails, reset the token fields
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpiry = undefined;
+      await user.save({ validateBeforeSave: false });
+      
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send password reset email'
+      });
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during password reset request'
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+    
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+    
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiry: { $gt: Date.now() }
+    });
+    
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+    
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiry = undefined;
+    await user.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successful'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during password reset'
+    });
   }
 };

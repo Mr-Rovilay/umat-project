@@ -120,10 +120,10 @@ const AboutSection = () => {
             <MapPin className="h-4 w-4" />
             <span>Tarkwa, Western Region, Ghana</span>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             About <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">UMaT</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Ghana's premier institution for mining, engineering, and technology education since 1952
           </p>
         </div>

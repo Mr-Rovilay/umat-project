@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerStudent, login, getUser, getTotalRegisteredStudents, changePassword, updateUser } from '../controllers/authController.js';
+import { registerStudent, login, getUser, getTotalRegisteredStudents, changePassword, updateUser, forgotPassword, resetPassword } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { restrictTo, restrictToDepartment } from '../middleware/roleMiddleware.js';
 import User from '../models/User.js';
@@ -24,5 +24,8 @@ router.post('/logout', protect, async (req, res) => {
 
 router.get('/admin/stats/registered-students/:departmentId', protect, restrictTo('admin'), restrictToDepartment, getTotalRegisteredStudents);
 router.put('/change-password', protect, restrictTo('student'), changePassword);
+
+router.post('/forgot-password', forgotPassword);
+router.put('/reset-password/:token', resetPassword);
 
 export default router;

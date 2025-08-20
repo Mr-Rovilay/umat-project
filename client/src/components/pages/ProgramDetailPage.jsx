@@ -25,11 +25,8 @@ const ProgramDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   // Access the Redux state correctly
-  const { currentProgram, programs, isLoading, error } = useSelector((state) => state.programs);
+  const { currentProgram, isLoading, error } = useSelector((state) => state.programs);
   
-  console.log("Current Program:", currentProgram);
-  console.log("All Programs:", programs);
-  console.log("ID:", id);
   
   const [isVisible, setIsVisible] = useState(false);
 

@@ -78,12 +78,32 @@ export const changePassword = createAsyncThunk(
   }
 );
 
-// Generate reference number utility
-// export const generateReferenceNumber = () => {
-//   const timestamp = Date.now().toString();
-//   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-//   return `REF-${timestamp.slice(-6)}-${random}`;
-// };
+// Async thunk for forgot password
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/api/auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to send reset email');
+    }
+  }
+);
+
+// Async thunk for reset password
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/api/auth/reset-password/${token}`, { password });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to reset password');
+    }
+  }
+);
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -94,6 +114,8 @@ const authSlice = createSlice({
     error: null,
     registrationSuccess: false,
     passwordChangeSuccess: false,
+    passwordResetSuccess: false,
+    passwordResetEmailSent: false,
   },
   reducers: {
     clearError: (state) => {
@@ -105,12 +127,18 @@ const authSlice = createSlice({
     clearPasswordChangeSuccess: (state) => {
       state.passwordChangeSuccess = false;
     },
+        clearPasswordResetSuccess: (state) => {
+      state.passwordResetSuccess = false;
+      state.passwordResetEmailSent = false;
+    },
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
       state.registrationSuccess = false;
       state.passwordChangeSuccess = false;
+       state.passwordResetSuccess = false;
+      state.passwordResetEmailSent = false;
     },
   },
   extraReducers: (builder) => {
@@ -207,9 +235,42 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.passwordChangeSuccess = false;
+      })
+      // Forgot password cases
+      .addCase(forgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.passwordResetEmailSent = false;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.passwordResetEmailSent = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.passwordResetEmailSent = false;
+      })
+
+      // Reset password cases
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.passwordResetSuccess = false;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.passwordResetSuccess = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.passwordResetSuccess = false;
       });
   },
 });
 
-export const { clearError, clearRegistrationSuccess, clearPasswordChangeSuccess, logout } = authSlice.actions;
+export const { clearError, clearRegistrationSuccess, clearPasswordChangeSuccess,clearPasswordResetSuccess, logout } = authSlice.actions;
 export default authSlice.reducer;
