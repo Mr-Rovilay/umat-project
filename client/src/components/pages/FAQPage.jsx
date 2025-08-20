@@ -327,16 +327,6 @@ const FAQPage = () => {
                   </div>
                 ))}
               </div>
-              
-              <div className="mt-10 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-gray-600 dark:text-gray-400">
-                  You can also visit our{" "}
-                  <Link to="/contact" className="text-emerald-600 hover:text-emerald-500 font-medium">
-                    Contact Page
-                  </Link>{" "}
-                  for more detailed support options.
-                </p>
-              </div>
             </div>
           </div>
         </div>
