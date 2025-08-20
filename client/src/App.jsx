@@ -29,6 +29,7 @@ import Accessibility from "./components/pages/Accessibility";
 import ClubsPage from "./components/pages/ClubsPage";
 import ForgotPassword from "./components/pages/ForgotPassword";
 import ResetPassword from "./components/pages/ResetPassword";
+import FAQPage from "./components/pages/FAQPage";
 
 function App() {
   useEffect(() => {
@@ -52,6 +53,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/programs" element={<ProgramsPage />} />
+          <Route path="/faqs" element={<FAQPage />} />
           <Route
             path="/profile"
             element={
