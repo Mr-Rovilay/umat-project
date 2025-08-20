@@ -1,7 +1,6 @@
 // components/pages/PrivacyPolicy.jsx
 import React from 'react';
 import { Shield, Lock, Database, Eye, Mail, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const PrivacyPolicy = () => {
   return (

@@ -1,8 +1,6 @@
 // components/pages/TermsOfUse.jsx
 import React from 'react';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { FileText, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const TermsOfUse = () => {
   return (
