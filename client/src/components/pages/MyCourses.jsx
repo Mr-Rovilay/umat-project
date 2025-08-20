@@ -164,7 +164,7 @@ function MyCourses() {
                 <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
                   Owing Status:{" "}
-                  {user.owingStatus === undefined || owingStatus ? (
+                  {user.owingStatus === false || owingStatus ? (
                     <span className="text-red-600 dark:text-red-400">
                       Pending Payment
                     </span>
@@ -213,7 +213,7 @@ function MyCourses() {
                 You haven't uploaded any registration slips yet. Upload your course registration slip and payment receipts to get started.
               </p>
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                <Link to="/dashboard/register">
+                <Link to="/courses/register">
                   Register Now
                 </Link>
               </Button>
