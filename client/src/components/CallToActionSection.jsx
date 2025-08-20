@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from './ui/button';
 
 const CallToActionSection = () => {
   return (
@@ -11,12 +12,12 @@ const CallToActionSection = () => {
           Start your journey towards becoming a leader in mining, engineering, and technology. Apply now to join our community of innovators.
         </p>
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-          <button className="bg-white text-emerald-700 hover:bg-gray-100 px-8 py-4 rounded-lg font-bold text-lg transition-colors duration-300 shadow-lg">
+          <Button className="bg-white text-emerald-700 hover:bg-gray-100 px-8 py-4 rounded-lg font-bold text-lg transition-colors duration-300 shadow-lg">
             Apply Now
-          </button>
-          <button className="border-2 border-white text-white hover:bg-white hover:text-emerald-700 px-8 py-4 rounded-lg font-bold text-lg transition-colors duration-300">
+          </Button>
+          <Button className="border-2 border-white text-white hover:bg-white hover:text-emerald-700 px-8 py-4 rounded-lg font-bold text-lg transition-colors duration-300">
             Schedule a Visit
-          </button>
+          </Button>
         </div>
       </div>
     </section>

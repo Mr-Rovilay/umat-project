@@ -42,19 +42,19 @@ const NewsEventsSection = () => {
                 <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-2">{item.date}</div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{item.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">{item.excerpt}</p>
-                <button className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">
+                {/* <button className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">
                   Read More →
-                </button>
+                </button> */}
               </div>
             </div>
           ))}
         </div>
         
-        <div className="text-center mt-12">
+        {/* <div className="text-center mt-12">
           <button className="border border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
             View All News
           </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

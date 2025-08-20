@@ -62,7 +62,7 @@ const HeroSection = () => {
       
       {/* Hero Content */}
       <div className="relative z-10 flex items-center min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="max-pad-container mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             
             {/* Left Content */}

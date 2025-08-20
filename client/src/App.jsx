@@ -23,6 +23,9 @@ import PaymentHistory from "./components/pages/PaymentHistory";
 import PaymentCallback from "./components/PaymentCallback ";
 import RegistrationDetails from "./components/pages/RegistrationDetails";
 import ProgramDetailPage from "./components/pages/ProgramDetailPage";
+import PrivacyPolicy from "./components/pages/PrivacyPolicy";
+import TermsOfUse from "./components/pages/TermsOfUse";
+import Accessibility from "./components/pages/Accessibility";
 
 function App() {
   useEffect(() => {
@@ -97,14 +100,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
-            path="/courses/available"
-            element={
-              <ProtectedRoute role="student">
-                <AvailableCourses />
-              </ProtectedRoute>
-            }
-          /> */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/accessibility" element={<Accessibility />} />
           <Route
             path="/payments/verify/:reference"
             element={
